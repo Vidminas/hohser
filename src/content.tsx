@@ -21,6 +21,52 @@ const searchEngineConfig: SearchEngineConfig = config[searchEngine];
 // Array of management component anchors
 const managementComponentAnchors: Array<Element> = [];
 
+function processNavbar() {
+  console.log(`processNavbar:\n${searchEngineConfig.filtersSelector}\n${searchEngineConfig.filtersAreaSelector}`);
+  if (!searchEngineConfig.filtersSelector && !searchEngineConfig.filtersAreaSelector)
+    return;
+
+  let filtersBar: HTMLDivElement | null;
+  if (searchEngineConfig.filtersSelector) {
+    filtersBar = document.querySelector(
+      searchEngineConfig.filtersSelector
+    );
+    console.log("filtersBar", filtersBar);
+  }
+
+  if (!filtersBar && searchEngineConfig.filtersAreaSelector) {
+    const filtersArea = document.querySelector(searchEngineConfig.filtersAreaSelector);
+    if (!filtersArea) return;
+
+    filtersBar = document.createElement("div");
+    filtersBar.classList.add("hohser_top_navbar");
+    console.log(filtersArea.insertAdjacentElement("beforeend", filtersBar));
+  }
+
+  if (!filtersBar) return;
+
+  filtersBar.setAttribute("role", "list");
+
+  const childrenTexts = ["Media kinds", "Level"];
+  const children: HTMLDivElement[] = [];
+  for (const childText of childrenTexts) {
+    const childContainer = document.createElement("div");
+    childContainer.setAttribute("role", "listitem");
+    children.push(childContainer);
+
+    const childButton = document.createElement("div");
+    childButton.classList.add("GKS7s");//"hohser_top_navbar_button");
+    childContainer.appendChild(childButton);
+
+    const childButtonLabel = document.createElement("span");
+    childButtonLabel.classList.add("FMKtTb", "UqcIvb", "bSsRe");
+    childButtonLabel.textContent = childText;
+    childButton.appendChild(childButtonLabel);
+  }
+
+  filtersBar.replaceChildren(...children);
+}
+
 // Turn array of RGBA values into CSS `rgba` function call
 function getRgbCss (color: Array<number>, alpha = 1): string {
   return `rgba(${color.map(Math.floor).join(', ') || null}, ${alpha})`;
@@ -205,7 +251,9 @@ browserStorageSync.get('options')
   .then((d: Domain[]) => {
     let domainList = d;
     // Initial process results
+    console.log("YO!");
     processResults(domainList, options);
+    processNavbar();
 
     // Re-process results on page load if it wasn't done initially
     if (document.readyState !== 'complete') {
