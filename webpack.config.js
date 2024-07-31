@@ -4,9 +4,11 @@ const CopyPlugin = require('copy-webpack-plugin');
 const WebpackHookPlugin = require('webpack-hook-plugin');
 
 module.exports = {
+  mode: 'production',
   entry: {
     popup: './src/popup.tsx',
-    content: './src/content.tsx'
+    content: './src/content.tsx',
+    background: './src/background.ts',
   },
   module: {
     rules: [
@@ -49,7 +51,7 @@ module.exports = {
     }),
     new WebpackHookPlugin({
       onBuildEnd: ['node src/utils/build.js']
-    })
+    }),
   ],
   resolve: {
     extensions: ['.tsx', 'jsx', '.ts', '.js'],
@@ -58,5 +60,4 @@ module.exports = {
     filename: 'firefox/static/js/[name].js',
     path: path.resolve(__dirname, 'build'),
   },
-  mode: 'production',
 };
