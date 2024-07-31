@@ -1,3 +1,41 @@
+.hohser_top_navbar {
+  cursor: grab;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  position: relative;
+  margin-top: 12px;
+  gap: 6px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.hohser_top_navbar > div {
+  pointer-events: auto;
+}
+
+.hohser_top_navbar_button {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  justify-content: center;
+  border: 1px solid var(--uv-styles-color-outline);
+  box-sizing: border-box;
+  background: --var(--xhUGwc);
+  border-radius: 20px;
+  min-width: 38px;
+  cursor: pointer;
+}
+
+.hohser_top_navbar_button > span {
+  margin: 0 16px;
+  font-family: Google Sans, Arial, sans-serif-medium, sans-serif;
+  font-size: 14px;
+  width: fit-content;
+}
+
 .hohser_partial_hide {
   opacity: 0.25;
 }
