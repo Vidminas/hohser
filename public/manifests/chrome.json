@@ -28,6 +28,10 @@
     "storage",
     "tabs"
   ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "static/js/background.js"
+  },
   "content_scripts": [
     {
       "matches": [

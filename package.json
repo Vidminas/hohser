@@ -18,6 +18,7 @@
     "tss-react": "^4.9.11"
   },
   "scripts": {
+    "dev": "concurrently 'webpack --watch' 'web-ext run --target chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\"'",
     "build": "webpack --stats-children",
     "load": "web-ext run --no-config-discovery --verbose --source-dir build/firefox/",
     "load:msedge": "web-ext run --no-config-discovery --verbose --source-dir build/chrome/ --target chromium --chromium-binary \"%ProgramFiles(x86)%/Microsoft/Edge/Application/msedge.exe\""
@@ -33,6 +34,7 @@
     "@types/react-redux": "^7.1.16",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.1.0",
+    "concurrently": "^8.2.2",
     "copy-webpack-plugin": "^10.0.0",
     "cross-env": "^7.0.2",
     "css-loader": "^5.0.0",
@@ -59,5 +61,6 @@
   "resolutions": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0"
-  }
+  },
+  "packageManager": "yarn@4.3.1"
 }
