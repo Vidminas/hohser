@@ -22,6 +22,9 @@ import Translate from "@mui/icons-material/Translate";
 import Synagogue from "@mui/icons-material/Synagogue";
 import Calculate from "@mui/icons-material/Calculate";
 import Handyman from "@mui/icons-material/Handyman";
+import MoneyOff from "@mui/icons-material/MoneyOff";
+import Paid from "@mui/icons-material/Paid";
+import Payments from "@mui/icons-material/Payments";
 
 // Initialize storage manager
 const storageManager = new StorageManager();
@@ -96,6 +99,30 @@ function processNavbar() {
         [Synagogue, "Religious and moral education"],
         [Calculate, "Numeracy and mathematics"],
         [Handyman, "Technologies"],
+      ]}
+    />
+    <FilterDropdown
+      label={"Levels"}
+      colourScheme={colourScheme}
+      options={[
+        [null, "BGE Early (ELC and P1)"],
+        [null, "BGE First (P2-P4)"],
+        [null, "BGE Second (P5-P7)"],
+        [null, "BGE Third (S1-S3)"],
+        [null, "National 3 (S3)"],
+        [null, "National 4 (S4)"],
+        [null, "National 5 (S4)"],
+        [null, "Higher (S5-S6)"],
+        [null, "Advanced Higher (S5-S6)"],
+      ]}
+    />,
+    <FilterDropdown
+      label={"Cost"}
+      colourScheme={colourScheme}
+      options={[
+        [MoneyOff, "Free"],
+        [Payments, "Subscription"],
+        [Paid, "Paid"],
       ]}
     />
   </>, container);

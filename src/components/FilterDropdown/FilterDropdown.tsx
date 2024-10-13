@@ -1,20 +1,16 @@
 import * as React from 'react';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import TextField from '@mui/material/TextField';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
-import Switch from '@mui/material/Switch';
 import SvgIcon from "@mui/material/SvgIcon";
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import { Input } from '@mui/material';
+import AvatarGroup from '@mui/material/AvatarGroup';
+import Avatar from '@mui/material/Avatar';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
 const MenuProps = {
   MenuListProps: {
     dense: true,
@@ -23,12 +19,6 @@ const MenuProps = {
       horizontal: "left"
     },
   },
-  // PaperProps: {
-  //   style: {
-  //     maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-  //     width: 250,
-  //   },
-  // },
 };
 
 interface FilterDropdownProps {
@@ -38,9 +28,9 @@ interface FilterDropdownProps {
 }
 
 export default function MultipleSelectCheckmarks({ label, colourScheme, options }: FilterDropdownProps) {
-  const [personName, setPersonName] = React.useState<string[]>([]);
   const labelId = label.replace(' ', '-');
-
+  const [selections, setSelections] = React.useState<string[]>([]);
+  const optionsMap = React.useMemo(() => Object.fromEntries(options.map(x => [x[1], x[0]])), [options]);
   const theme = React.useMemo(
     () =>
       createTheme({
@@ -51,11 +41,11 @@ export default function MultipleSelectCheckmarks({ label, colourScheme, options 
     [colourScheme],
   );
 
-  const handleChange = (event: SelectChangeEvent<typeof personName>) => {
+  const handleChange = (event: SelectChangeEvent<typeof selections>) => {
     const {
       target: { value },
     } = event;
-    setPersonName(
+    setSelections(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
     );
@@ -69,19 +59,28 @@ export default function MultipleSelectCheckmarks({ label, colourScheme, options 
           sx={{ fontSize: 14 }}
           labelId={labelId}
           multiple
-          value={personName}
+          value={selections}
           onChange={handleChange}
-          renderValue={(selected) => selected.join(', ')}
+          renderValue={
+            (selected) => 
+            <AvatarGroup max={5} variant="circular" slotProps={{additionalAvatar: { sx: { width: 16, height: 16, fontSize: 16, backgroundColor: "rgb(251, 247, 241)" } }}}>
+              {selected.map((value) => {
+                const OptionIcon = optionsMap[value];
+                return (<Avatar alt={value} variant="circular" sx={{ width: 16, height: 16, backgroundColor: "rgb(251, 247, 241)" }}>
+                  {OptionIcon && <OptionIcon sx={{ fontSize: 16 }} />}
+                </Avatar>);
+              })}        
+            </AvatarGroup>
+          }
           MenuProps={MenuProps}
           size="small"
         >
           {options.map(([OptionIcon, opt]) => (
             <MenuItem key={opt} value={opt} dense sx={{ padding: "0px 16px 0px 0px"}}>
-              {/* <Switch checked={personName.indexOf(opt) > -1} size="small" /> */}
-              <Checkbox checked={personName.indexOf(opt) > -1} size="small" />
-              <ListItemIcon>
+              <Checkbox checked={selections.indexOf(opt) > -1} size="small" />
+              {OptionIcon && <ListItemIcon>
                 <OptionIcon fontSize="small" />
-              </ListItemIcon>
+              </ListItemIcon>}
               <ListItemText primary={opt} />
             </MenuItem>
           ))}
