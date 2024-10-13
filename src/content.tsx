@@ -9,6 +9,19 @@ import * as ReactDOM from 'react-dom';
 import { ResultManagement } from './components/Content/ResultManagement';
 import { ResizeObserver } from './mock/ResizeObserver';
 import { DomainsCounter } from './components/Content/DomainsCounter';
+import FilterDropdown from './components/FilterDropdown/FilterDropdown';
+import Image from "@mui/icons-material/Image";
+import VideoLibrary from "@mui/icons-material/VideoLibrary";
+import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
+import Web from "@mui/icons-material/Web";
+import Palette from "@mui/icons-material/Palette";
+import Diversity3 from "@mui/icons-material/Diversity3";
+import Science from "@mui/icons-material/Science";
+import Spa from "@mui/icons-material/Spa";
+import Translate from "@mui/icons-material/Translate";
+import Synagogue from "@mui/icons-material/Synagogue";
+import Calculate from "@mui/icons-material/Calculate";
+import Handyman from "@mui/icons-material/Handyman";
 
 // Initialize storage manager
 const storageManager = new StorageManager();
@@ -22,49 +35,72 @@ const searchEngineConfig: SearchEngineConfig = config[searchEngine];
 const managementComponentAnchors: Array<Element> = [];
 
 function processNavbar() {
-  console.log(`processNavbar:\n${searchEngineConfig.filtersSelector}\n${searchEngineConfig.filtersAreaSelector}`);
-  if (!searchEngineConfig.filtersSelector && !searchEngineConfig.filtersAreaSelector)
-    return;
+  if (!searchEngineConfig.toolsBarSelector)
+    return null;
 
-  let filtersBar: HTMLDivElement | null;
-  if (searchEngineConfig.filtersSelector) {
-    filtersBar = document.querySelector(
-      searchEngineConfig.filtersSelector
+  if (searchEngineConfig.toolsButtonSelector) {
+    const toolsButton: HTMLDivElement | null = document.querySelector(
+      searchEngineConfig.toolsButtonSelector
     );
-    console.log("filtersBar", filtersBar);
+
+    if (toolsButton && (!searchEngineConfig.toolsButtonSelectedClass || !document.querySelector(searchEngineConfig.toolsButtonSelectedClass))) {
+      toolsButton.click();
+    }
   }
 
-  if (!filtersBar && searchEngineConfig.filtersAreaSelector) {
-    const filtersArea = document.querySelector(searchEngineConfig.filtersAreaSelector);
-    if (!filtersArea) return;
+  const toolsBar: HTMLDivElement | null = document.querySelector(
+    searchEngineConfig.toolsBarSelector
+  );
+  if (!toolsBar)
+    return null;
 
-    filtersBar = document.createElement("div");
-    filtersBar.classList.add("hohser_top_navbar");
-    console.log(filtersArea.insertAdjacentElement("beforeend", filtersBar));
+  toolsBar.style.height = "auto";
+
+  const insideToolBar = toolsBar.firstElementChild as HTMLDivElement;
+  insideToolBar.style.alignItems = "end";
+
+  const container = document.createElement("div");
+  insideToolBar.insertBefore(container, insideToolBar.children[1]);
+  let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
+  if (colourScheme !== 'light' && colourScheme !== 'dark') {
+    const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
+    if (bodyBackground === 'rgb(255, 255, 255)') {
+        colourScheme = 'light';
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        colourScheme = 'dark';
+    } else {
+        colourScheme = 'light';
+    }
   }
+  ReactDOM.render(
+  <>
+    <FilterDropdown
+      label={"Media types"}
+      colourScheme={colourScheme}
+      options={[
+        [Image, "Images"],
+        [VideoLibrary, "Videos"],
+        [PictureAsPdf, "Documents"],
+        [Web, "Websites"],
+      ]}
+    />
+    <FilterDropdown
+      label={"Subjects"}
+      colourScheme={colourScheme}
+      options={[
+        [Palette, "Expressive Arts"],
+        [Diversity3, "Social studies"],
+        [Science, "Sciences"],
+        [Spa, "Health and wellbeing"],
+        [Translate, "Languages"],
+        [Synagogue, "Religious and moral education"],
+        [Calculate, "Numeracy and mathematics"],
+        [Handyman, "Technologies"],
+      ]}
+    />
+  </>, container);
 
-  if (!filtersBar) return;
-
-  filtersBar.setAttribute("role", "list");
-
-  const childrenTexts = ["Media kinds", "Level"];
-  const children: HTMLDivElement[] = [];
-  for (const childText of childrenTexts) {
-    const childContainer = document.createElement("div");
-    childContainer.setAttribute("role", "listitem");
-    children.push(childContainer);
-
-    const childButton = document.createElement("div");
-    childButton.classList.add("GKS7s");//"hohser_top_navbar_button");
-    childContainer.appendChild(childButton);
-
-    const childButtonLabel = document.createElement("span");
-    childButtonLabel.classList.add("FMKtTb", "UqcIvb", "bSsRe");
-    childButtonLabel.textContent = childText;
-    childButton.appendChild(childButtonLabel);
-  }
-
-  filtersBar.replaceChildren(...children);
+  return toolsBar;
 }
 
 // Turn array of RGBA values into CSS `rgba` function call
@@ -179,7 +215,7 @@ function processResult (r: Element, domainList: any, options: any, processResult
 
             result.insertAdjacentElement("afterend", badge);
           } else {
-            console.log(text);
+            // console.log(text);
             const badge = document.createElement("p");
             // Use the same styling as the publish information in an article's header
             badge.classList.add("color-secondary-text", "type--caption");
@@ -275,6 +311,18 @@ async function processResults (domainList: Domain[], options: Options): Promise<
   }
 }
 
+if (document.readyState !== 'complete') {
+  window.addEventListener('load', () => {
+    const toolBar = processNavbar();
+    // const observer = new MutationObserver(processNavbar);
+    // observer.observe(toolBar, { childList: true });
+  }, false);
+} else {
+  const toolBar = processNavbar();
+  // const observer = new MutationObserver(processNavbar);
+  // observer.observe(toolBar, { childList: true });
+}
+
 // Check if Firefox or Chrome and assign the right storage object
 const browserStorageSync = ((typeof browser !== 'undefined') && browser.storage.sync) ||
                          ((typeof chrome !== 'undefined') && (chrome.storage as any).promise.sync);
@@ -291,7 +339,6 @@ browserStorageSync.get('options')
     // Initial process results
     console.log("YO!");
     processResults(domainList, options);
-    processNavbar();
 
     // Process results on page load
     document.addEventListener('load', () => {

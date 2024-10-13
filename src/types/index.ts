@@ -19,8 +19,9 @@ export interface Options {
 }
 
 export interface SearchEngineConfig {
-  filtersSelector?: string;
-  filtersAreaSelector?: string;
+  toolsButtonSelector?: string;
+  toolsButtonSelectedClass?: string;
+  toolsBarSelector?: string;
   resultSelector: string;
   domainSelector: string;
   observerSelector: string;
