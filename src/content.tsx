@@ -25,6 +25,7 @@ import Handyman from "@mui/icons-material/Handyman";
 import MoneyOff from "@mui/icons-material/MoneyOff";
 import Paid from "@mui/icons-material/Paid";
 import Payments from "@mui/icons-material/Payments";
+import { ChipsArray } from "./components/App/Tags";
 
 // Initialize storage manager
 const storageManager = new StorageManager();
@@ -230,25 +231,44 @@ function processResult (r: Element, domainList: any, options: any, processResult
             // matchAll returns an iterator, convert to array to get word count
             const wordCount = [...words].length;
             const readingTime = Math.round(wordCount / 200);
-            const badge = document.createElement("p");
+
+            
+            // const badge = document.createElement("p");
             // Use the same styling as the publish information in an article's header
-            badge.classList.add("color-secondary-text", "type--caption");
-            badge.textContent = `⏱️ ${readingTime} min read`;
+            // badge.classList.add("color-secondary-text", "type--caption");
+            // badge.textContent = `⏱️ ${readingTime} min read`;
+          
 
             // Support for API reference docs
             // const heading = article.querySelector("h1");
             // Support for article docs with date
             // const date = article.querySelector("time")?.parentNode;
 
-            result.insertAdjacentElement("afterend", badge);
+            // result.insertAdjacentElement("afterend", badge);
           } else {
             // console.log(text);
-            const badge = document.createElement("p");
-            // Use the same styling as the publish information in an article's header
-            badge.classList.add("color-secondary-text", "type--caption");
-            badge.textContent = `No articles found in result ¯\\_(ツ)_/¯`;
-            result.insertAdjacentElement("afterend", badge);
+            // const badge = document.createElement("p");
+            // // Use the same styling as the publish information in an article's header
+            // badge.classList.add("color-secondary-text", "type--caption");
+            // badge.textContent = `No articles found in result ¯\\_(ツ)_/¯`;
+            // result.insertAdjacentElement("afterend", badge);
           }
+
+          let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
+          if (colourScheme !== 'light' && colourScheme !== 'dark') {
+            const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
+            if (bodyBackground === 'rgb(255, 255, 255)') {
+                colourScheme = 'light';
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                colourScheme = 'dark';
+            } else {
+                colourScheme = 'light';
+            }
+          }
+
+          const badge = document.createElement("div");
+          ReactDOM.render(<ChipsArray colourScheme={colourScheme} />, badge);
+          result.firstElementChild.insertAdjacentElement("afterbegin", badge);
       });
     }
 
@@ -364,7 +384,6 @@ browserStorageSync.get('options')
   .then((d: Domain[]) => {
     let domainList = d;
     // Initial process results
-    console.log("YO!");
     processResults(domainList, options);
 
     // Re-process results on page load if it wasn't done initially

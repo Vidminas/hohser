@@ -10,6 +10,7 @@ import EditDomain from '../EditDomain/EditDomain';
 import Drawer from '../SideMenu/Drawer';
 import SnackBar from './SnackBar';
 import SearchBox from '../SearchBox/SearchBox';
+import Tags from './Tags';
 
 export interface Props {
   domainsList: Array<Domain>;
@@ -145,31 +146,34 @@ class App extends React.Component<Props, State> {
         domainsList={this.props.domainsList}
         importDomains={this.props.importDomains}
       />,
-      <SearchBox
-        open={this.state.searchIsOpen}
-        toggle={() => this.toggleSearch()}
-        onChangeSearchTextField={this.handleOnChangeSearchTextField}
-        value={this.state.searchedPhrase}
+      <Tags 
+        currentTabUrl={this.props.currentTabUrl}
       />,
-      <DomainsList
-        domainsList={this.props.domainsList}
-        highlightColors={this.props.options.highlightColors}
-        removeDomainHandle={(domainName: string) => this.handleRemoveDomain(domainName)}
-        editDomainHandle={(i: any) => this.editDomainHandle(i)}
-        searchedPhrase={this.state.searchedPhrase}
-        openSearch={() => this.toggleSearch()}
-      />,
-      <EditDomain
-        open={this.state.editedDomain}
-        closeEditionHandle={() => this.closeEditionHandle()}
-        domain={this.state.editedDomain !== null ? this.props.domainsList[this.state.editedDomain] : null}
-        editDomain={(index: number, domainName: string, display: DisplayStyle, color?: Color) => this.props.editDomain(index, domainName, display, color)}
-        options={this.props.options}
-      />,
-      <BottomBar
-        addDomain={this.props.addDomain}
-        options={this.props.options}
-        currentTabUrl={this.props.currentTabUrl} />
+      // <SearchBox
+      //   open={this.state.searchIsOpen}
+      //   toggle={() => this.toggleSearch()}
+      //   onChangeSearchTextField={this.handleOnChangeSearchTextField}
+      //   value={this.state.searchedPhrase}
+      // />,
+      // <DomainsList
+      //   domainsList={this.props.domainsList}
+      //   highlightColors={this.props.options.highlightColors}
+      //   removeDomainHandle={(domainName: string) => this.handleRemoveDomain(domainName)}
+      //   editDomainHandle={(i: any) => this.editDomainHandle(i)}
+      //   searchedPhrase={this.state.searchedPhrase}
+      //   openSearch={() => this.toggleSearch()}
+      // />,
+      // <EditDomain
+      //   open={this.state.editedDomain}
+      //   closeEditionHandle={() => this.closeEditionHandle()}
+      //   domain={this.state.editedDomain !== null ? this.props.domainsList[this.state.editedDomain] : null}
+      //   editDomain={(index: number, domainName: string, display: DisplayStyle, color?: Color) => this.props.editDomain(index, domainName, display, color)}
+      //   options={this.props.options}
+      // />,
+      // <BottomBar
+      //   addDomain={this.props.addDomain}
+      //   options={this.props.options}
+      //   currentTabUrl={this.props.currentTabUrl} />
     ];
   }
 }

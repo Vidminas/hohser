@@ -47,16 +47,16 @@ const TopBar = (props: Props) => {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" color="inherit" className={classes.grow} >
-          Highlight or Hide
+          Page Educational Tags
         </Typography>
-        <IconButton
+        {/* <IconButton
           className={classes.searchButton}
           color="inherit"
           aria-label="Search"
           onClick={() => props.toggleSearch()}
           size="large">
           <SearchIcon />
-        </IconButton>
+        </IconButton> */}
       </Toolbar>
     </AppBar>
   );
