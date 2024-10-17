@@ -10,6 +10,7 @@ import { ResultManagement } from './components/Content/ResultManagement';
 import { ResizeObserver } from './mock/ResizeObserver';
 import { DomainsCounter } from './components/Content/DomainsCounter';
 import FilterDropdown from './components/FilterDropdown/FilterDropdown';
+import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
 import Image from "@mui/icons-material/Image";
 import VideoLibrary from "@mui/icons-material/VideoLibrary";
 import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
@@ -38,6 +39,32 @@ const searchEngineConfig: SearchEngineConfig = config[searchEngine];
 // Array of management component anchors
 const managementComponentAnchors: Array<Element> = [];
 
+let theme: Theme;
+
+const getTheme = () => {
+  if (theme) {
+    return theme;
+  }
+  let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
+  if (colourScheme !== 'light' && colourScheme !== 'dark') {
+    const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
+    if (bodyBackground === 'rgb(255, 255, 255)') {
+        colourScheme = 'light';
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        colourScheme = 'dark';
+    } else {
+        colourScheme = 'light';
+    }
+  }
+
+  theme = createTheme({
+    palette: {
+      mode: colourScheme,
+    },
+  });
+  return theme;
+}
+
 function processNavbar() {
   if (!searchEngineConfig.toolsBarSelector)
     return null;
@@ -65,22 +92,11 @@ function processNavbar() {
 
   const container = document.createElement("div");
   insideToolBar.insertBefore(container, insideToolBar.children[1]);
-  let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
-  if (colourScheme !== 'light' && colourScheme !== 'dark') {
-    const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
-    if (bodyBackground === 'rgb(255, 255, 255)') {
-        colourScheme = 'light';
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        colourScheme = 'dark';
-    } else {
-        colourScheme = 'light';
-    }
-  }
+  
   ReactDOM.render(
-  <>
+    <ThemeProvider theme={getTheme()}>
     <FilterDropdown
       label={"Media types"}
-      colourScheme={colourScheme}
       options={[
         [Image, "Images"],
         [VideoLibrary, "Videos"],
@@ -90,7 +106,6 @@ function processNavbar() {
     />
     <FilterDropdown
       label={"Subjects"}
-      colourScheme={colourScheme}
       options={[
         [Palette, "Expressive Arts"],
         [Diversity3, "Social studies"],
@@ -104,7 +119,6 @@ function processNavbar() {
     />
     <FilterDropdown
       label={"Levels"}
-      colourScheme={colourScheme}
       options={[
         [null, "BGE Early (ELC and P1)"],
         [null, "BGE First (P2-P4)"],
@@ -119,14 +133,13 @@ function processNavbar() {
     />,
     <FilterDropdown
       label={"Cost"}
-      colourScheme={colourScheme}
       options={[
         [MoneyOff, "Free"],
         [Payments, "Subscription"],
         [Paid, "Paid"],
       ]}
     />
-  </>, container);
+  </ThemeProvider>, container);
 
   return toolsBar;
 }
@@ -254,20 +267,8 @@ function processResult (r: Element, domainList: any, options: any, processResult
             // result.insertAdjacentElement("afterend", badge);
           }
 
-          let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
-          if (colourScheme !== 'light' && colourScheme !== 'dark') {
-            const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
-            if (bodyBackground === 'rgb(255, 255, 255)') {
-                colourScheme = 'light';
-            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                colourScheme = 'dark';
-            } else {
-                colourScheme = 'light';
-            }
-          }
-
           const badge = document.createElement("div");
-          ReactDOM.render(<ChipsArray colourScheme={colourScheme} />, badge);
+          ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray /></ThemeProvider>, badge);
           result.firstElementChild.insertAdjacentElement("afterbegin", badge);
       });
     }

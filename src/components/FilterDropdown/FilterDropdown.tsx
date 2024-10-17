@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -23,23 +22,13 @@ const MenuProps = {
 
 interface FilterDropdownProps {
   label: string;
-  colourScheme?: 'light' | 'dark';
   options: [typeof SvgIcon, string][];
 }
 
-export default function MultipleSelectCheckmarks({ label, colourScheme, options }: FilterDropdownProps) {
+export default function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
   const labelId = label.replace(' ', '-');
   const [selections, setSelections] = React.useState<string[]>([]);
   const optionsMap = React.useMemo(() => Object.fromEntries(options.map(x => [x[1], x[0]])), [options]);
-  const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: colourScheme ?? 'light',
-        },
-      }),
-    [colourScheme],
-  );
 
   const handleChange = (event: SelectChangeEvent<typeof selections>) => {
     const {
@@ -52,7 +41,6 @@ export default function MultipleSelectCheckmarks({ label, colourScheme, options 
   };
 
   return (
-    <ThemeProvider theme={theme}>
       <FormControl sx={{ ml: 1, mr: 1, width: 100 }} size="small" variant="standard">
         <InputLabel sx={{ fontSize: 14 }} id={labelId} size="small">{label}</InputLabel>
         <Select
@@ -86,6 +74,5 @@ export default function MultipleSelectCheckmarks({ label, colourScheme, options 
           ))}
         </Select>
       </FormControl>
-    </ThemeProvider>
   );
 }

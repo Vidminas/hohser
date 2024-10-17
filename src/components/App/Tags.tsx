@@ -96,8 +96,7 @@ const levels = [
   "Advanced Higher (S5-S6)",
 ];
 
-export function ChipsArray(props) {
-  const { colourScheme } = props;
+export function ChipsArray() {
   const [chipData, setChipData] = React.useState<readonly ChipData[]>([
     { key: 0, label: 'Website' },
     { key: 1, label: levels[Math.floor(Math.random() * levels.length)] },
@@ -109,48 +108,36 @@ export function ChipsArray(props) {
     setChipData((chips) => chips.filter((chip) => chip.key !== chipToDelete.key));
   };
 
-  const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode: colourScheme ?? 'light',
-        },
-      }),
-    [colourScheme],
-  );
-
   return (
-    <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {chipData.map((data) => (
                 <Chip key={data.key} label={data.label} />
               ))}
             </Box>
-    {/* <Paper
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        listStyle: 'none',
-        p: 0.5,
-        m: 0,
-      }}
-      component="ul"
-    >
-      {chipData.map((data) => {
-        let icon;
-        return (
-          <ListItem key={data.key}>
-            <Chip
-              icon={icon}
-              label={data.label}
-              onDelete={data.label === 'React' ? undefined : handleDelete(data)}
-            />
-          </ListItem>
-        );
-      })}
-    </Paper> */}
-    </ThemeProvider>
+    // <Paper
+    //   sx={{
+    //     display: 'flex',
+    //     justifyContent: 'center',
+    //     flexWrap: 'wrap',
+    //     listStyle: 'none',
+    //     p: 0.5,
+    //     m: 0,
+    //   }}
+    //   component="ul"
+    // >
+    //   {chipData.map((data) => {
+    //     let icon;
+    //     return (
+    //       <ListItem key={data.key}>
+    //         <Chip
+    //           icon={icon}
+    //           label={data.label}
+    //           onDelete={data.label === 'React' ? undefined : handleDelete(data)}
+    //         />
+    //       </ListItem>
+    //     );
+    //   })}
+    // </Paper>
   );
 }
 
@@ -201,17 +188,6 @@ const ChipsDropdown = ({label, options}: TagType) => {
 
 const Tags = (props: Props) => {
   const classes = withStyles.getClasses(props);
-  let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
-  if (colourScheme !== 'light' && colourScheme !== 'dark') {
-    const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
-    if (bodyBackground === 'rgb(255, 255, 255)') {
-        colourScheme = 'light';
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        colourScheme = 'dark';
-    } else {
-        colourScheme = 'light';
-    }
-  }
 
   const [tagTypes, setTagTypes] = React.useState<readonly TagType[]>([
     { label: "Media type(s)", options: [
