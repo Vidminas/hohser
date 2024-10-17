@@ -96,27 +96,45 @@ const getTheme = () => {
   return theme;
 }
 
-function processNavbar() {
+// From https://stackoverflow.com/questions/5525071/how-to-wait-until-an-element-exists
+function waitForElement(selector: string): Promise<Element> {
+  return new Promise(resolve => {
+      if (document.querySelector(selector)) {
+          return resolve(document.querySelector(selector));
+      }
+
+      const observer = new MutationObserver(mutations => {
+          if (document.querySelector(selector)) {
+              observer.disconnect();
+              resolve(document.querySelector(selector));
+          }
+      });
+
+      // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+      observer.observe(document.body, {
+          childList: true,
+          subtree: true
+      });
+  });
+}
+
+async function processNavbar() {
   if (!searchEngineConfig.toolsBarSelector)
     return null;
 
   if (searchEngineConfig.toolsButtonSelector) {
-    const toolsButton: HTMLDivElement | null = document.querySelector(
-      searchEngineConfig.toolsButtonSelector
-    );
+    const toolsButton = await waitForElement(searchEngineConfig.toolsButtonSelector);
 
     if (toolsButton && (!searchEngineConfig.toolsButtonSelectedClass || !document.querySelector(searchEngineConfig.toolsButtonSelectedClass))) {
-      toolsButton.click();
+      (toolsButton as HTMLElement).click();
     }
   }
 
-  const toolsBar: HTMLDivElement | null = document.querySelector(
-    searchEngineConfig.toolsBarSelector
-  );
+  const toolsBar = await waitForElement(searchEngineConfig.toolsBarSelector);
   if (!toolsBar)
     return null;
 
-  toolsBar.style.height = "auto";
+  (toolsBar as HTMLElement).style.height = "auto";
 
   const insideToolBar = toolsBar.firstElementChild as HTMLDivElement;
   insideToolBar.style.alignItems = "end";
