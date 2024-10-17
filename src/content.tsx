@@ -45,21 +45,52 @@ const getTheme = () => {
   if (theme) {
     return theme;
   }
-  let colourScheme = getComputedStyle(document.documentElement).getPropertyValue('color-scheme') as 'light' | 'dark';
-  if (colourScheme !== 'light' && colourScheme !== 'dark') {
-    const bodyBackground = getComputedStyle(document.body).getPropertyValue('background-color');
-    if (bodyBackground === 'rgb(255, 255, 255)') {
-        colourScheme = 'light';
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        colourScheme = 'dark';
-    } else {
-        colourScheme = 'light';
+
+  // Approach inspired by https://github.com/code-charity/dark-mode/blob/master/content-scripts/filters.js
+  const colors = [];
+  let isDark = false;
+
+  function parse(element: Element, depth: number, depth_limit: number) {
+    depth++;
+
+    for (let i = 0, l = element.children.length; i < l; i++) {
+      const child = element.children[i];
+      const rect = child.getBoundingClientRect();
+
+      if (
+        rect.width >= document.body.offsetWidth &&
+        rect.height >= window.innerHeight
+      ) {
+        colors.push(getComputedStyle(child).backgroundColor);
+      }
+
+      if (depth < depth_limit && child.children) {
+        parse(child, depth, depth_limit);
+      }
+    }
+  }
+
+  colors.push(getComputedStyle(document.documentElement).backgroundColor);
+  colors.push(getComputedStyle(document.body).backgroundColor);
+  parse(document.body, 0, 3);
+
+  for (const color of colors) {
+    const arr = color.split("(")[1].split(")")[0].split(",");
+    if (arr.length < 4 || parseFloat(arr[3]) > 0.5) {
+      const r = parseInt(arr[0]) / 255;
+      const g = parseInt(arr[1]) / 255;
+      const b = parseInt(arr[2]) / 255;
+      const lightness = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
+      if (lightness < 0.5) {
+        isDark = true;
+        break;
+      }
     }
   }
 
   theme = createTheme({
     palette: {
-      mode: colourScheme,
+      mode: isDark ? 'dark' : 'light',
     },
   });
   return theme;
@@ -107,7 +138,7 @@ function processNavbar() {
     <FilterDropdown
       label={"Subjects"}
       options={[
-        [Palette, "Expressive Arts"],
+        [Palette, "Expressive arts"],
         [Diversity3, "Social studies"],
         [Science, "Sciences"],
         [Spa, "Health and wellbeing"],
