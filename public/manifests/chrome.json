@@ -255,6 +255,27 @@
       "css": [
         "static/css/content.css"
       ]
+    },
+    {
+      "matches": ["<all_urls>"],
+      "exclude_globs": [
+        "*.google.*",
+        "*://*.duckduckgo.com/*",
+        "*://*.yahoo.com/*",
+        "*://*.yahoo.co.jp/*",
+        "*://*.qwant.com/*",
+        "*://*.bing.com/*",
+        "*://*.startpage.com/*",
+        "*://*.ecosia.org/*",
+        "*://*.yandex.ru/*",
+        "*://*.yandex.com/*",
+        "*://*.onesearch.com/*",
+        "*://*.baidu.cn/*",
+        "*://*.baidu.com/*",
+        "*://*.kagi.com/*",
+        "*://*.search.brave.com/*"
+      ],
+      "js": ["static/js/topbar.js"]
     }
   ],
   "content_security_policy": {
