@@ -146,7 +146,7 @@ interface TagType {
   options: [typeof SvgIcon, string][];
 }
 
-const ChipsDropdown = ({label, options}: TagType) => {
+export const ChipsDropdown = ({label, options}: TagType) => {
   return <Autocomplete
                   sx={{ fontSize: 14, ml: 1, mr: 1, width: 300 }}
                   size="small"
@@ -172,12 +172,12 @@ const ChipsDropdown = ({label, options}: TagType) => {
                     const { key, ...optionProps } = props;
                     const [OptionIcon, optLabel] = option;
                     return (
-                      <li key={key} {...optionProps} >
+                      <MenuItem key={key} {...optionProps} dense sx={{ padding: "0px 16px 0px 0px"}}>
                         {OptionIcon && <ListItemIcon>
                           <OptionIcon fontSize="small" />
                         </ListItemIcon>}
                         <ListItemText primary={optLabel} />
-                      </li>
+                      </MenuItem>
                     );
                   }
                 }

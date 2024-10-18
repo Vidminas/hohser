@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { withStyles } from 'tss-react/mui';
+import type { Theme } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -7,25 +9,17 @@ import Checkbox from '@mui/material/Checkbox';
 import SvgIcon from "@mui/material/SvgIcon";
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Avatar from '@mui/material/Avatar';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import Chip from '@mui/material/Chip';
 
-const MenuProps = {
-  MenuListProps: {
-    dense: true,
-    anchorOrigin: {
-      vertical: "bottom",
-      horizontal: "left"
-    },
-  },
-};
 
 interface FilterDropdownProps {
   label: string;
   options: [typeof SvgIcon, string][];
 }
 
-export default function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
+function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
   const labelId = label.replace(' ', '-');
   const [selections, setSelections] = React.useState<string[]>([]);
   const optionsMap = React.useMemo(() => Object.fromEntries(options.map(x => [x[1], x[0]])), [options]);
@@ -41,38 +35,39 @@ export default function MultipleSelectCheckmarks({ label, options }: FilterDropd
   };
 
   return (
-      <FormControl sx={{ ml: 1, mr: 1, width: 100 }} size="small" variant="standard">
-        <InputLabel sx={{ fontSize: 14 }} id={labelId} size="small">{label}</InputLabel>
-        <Select
-          sx={{ fontSize: 14 }}
-          labelId={labelId}
-          multiple
-          value={selections}
-          onChange={handleChange}
-          renderValue={
-            (selected) => 
-            <AvatarGroup max={5} variant="circular" slotProps={{additionalAvatar: { sx: { width: 16, height: 16, fontSize: 16, backgroundColor: "rgb(251, 247, 241)" } }}}>
-              {selected.map((value) => {
-                const OptionIcon = optionsMap[value];
-                return (<Avatar alt={value} variant="circular" sx={{ width: 16, height: 16, backgroundColor: "rgb(251, 247, 241)" }}>
-                  {OptionIcon && <OptionIcon sx={{ fontSize: 16 }} />}
-                </Avatar>);
-              })}        
-            </AvatarGroup>
-          }
-          MenuProps={MenuProps}
+        <Autocomplete
+          sx={{ fontSize: 14, ml: 1, mr: 1, width: 100 }}
           size="small"
-        >
-          {options.map(([OptionIcon, opt]) => (
-            <MenuItem key={opt} value={opt} dense sx={{ padding: "0px 16px 0px 0px"}}>
-              <Checkbox checked={selections.indexOf(opt) > -1} size="small" />
-              {OptionIcon && <ListItemIcon>
-                <OptionIcon fontSize="small" />
-              </ListItemIcon>}
-              <ListItemText primary={opt} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          multiple
+          limitTags={1}
+          options={options}
+          disableClearable
+          renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => {
+            const { key, ...tagProps } = getTagProps({ index });
+            return <Chip {...tagProps} key={key} label={option[1]} size="small" />;
+            })
+          }
+          renderInput={(params) => (
+            <TextField {...params} variant="standard" size="small" label={label}
+              slotProps={{ inputLabel: { sx: { fontSize: 14 } } } }
+             />
+          )}
+          renderOption={(props, option) => {
+            const { key, ...optionProps } = props;
+            const [OptionIcon, optLabel] = option;
+            return (
+              <MenuItem key={key} {...optionProps} dense sx={{ padding: "0px 16px 0px 0px"}}>
+                {OptionIcon && <ListItemIcon>
+                  <OptionIcon fontSize="small" />
+                </ListItemIcon>}
+                <ListItemText primary={optLabel} />
+              </MenuItem>
+            );
+          }
+        }
+        slotProps={{ popper: { style: { width: "fit-content" } } }}
+        />
   );
 }
+
+export default MultipleSelectCheckmarks;

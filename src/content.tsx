@@ -27,6 +27,7 @@ import MoneyOff from "@mui/icons-material/MoneyOff";
 import Paid from "@mui/icons-material/Paid";
 import Payments from "@mui/icons-material/Payments";
 import { ChipsArray } from "./components/App/Tags";
+import Stack from "@mui/material/Stack";
 
 // Initialize storage manager
 const storageManager = new StorageManager();
@@ -144,6 +145,7 @@ async function processNavbar() {
   
   ReactDOM.render(
     <ThemeProvider theme={getTheme()}>
+      <Stack spacing={2} direction="row">
     <FilterDropdown
       label={"Media types"}
       options={[
@@ -188,6 +190,7 @@ async function processNavbar() {
         [Paid, "Paid"],
       ]}
     />
+    </Stack>
   </ThemeProvider>, container);
 
   return toolsBar;
