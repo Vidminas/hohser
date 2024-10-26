@@ -2,6 +2,7 @@ import * as React from 'react';
 import { withStyles } from 'tss-react/mui';
 import type { Theme } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
+import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
@@ -12,6 +13,14 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
+
+const CustomPopper = (props) => (
+    <Popper
+      {...props}
+      placement="bottom"
+      style={{ width: props.anchorEl.clientWidth, minWidth: "fit-content" }}
+    />
+);
 
 
 interface FilterDropdownProps {
@@ -36,12 +45,13 @@ function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
 
   return (
         <Autocomplete
-          sx={{ fontSize: 14, ml: 1, mr: 1, width: 100 }}
+          sx={{ fontSize: 14, marginLeft: 1, marginRight: 1 }}
           size="small"
           multiple
           limitTags={1}
           options={options}
           disableClearable
+          disableCloseOnSelect
           renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => {
             const { key, ...tagProps } = getTagProps({ index });
             return <Chip {...tagProps} key={key} label={option[1]} size="small" />;
@@ -52,11 +62,12 @@ function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
               slotProps={{ inputLabel: { sx: { fontSize: 14 } } } }
              />
           )}
-          renderOption={(props, option) => {
+          renderOption={(props, option, { selected }) => {
             const { key, ...optionProps } = props;
             const [OptionIcon, optLabel] = option;
             return (
               <MenuItem key={key} {...optionProps} dense sx={{ padding: "0px 16px 0px 0px"}}>
+                <Checkbox checked={selected} size="small" sx={{ padding: 0, marginRight: 1 }} />
                 {OptionIcon && <ListItemIcon>
                   <OptionIcon fontSize="small" />
                 </ListItemIcon>}
@@ -65,8 +76,8 @@ function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
             );
           }
         }
-        slotProps={{ popper: { style: { width: "fit-content" } } }}
-        />
+        PopperComponent={CustomPopper}
+      />
   );
 }
 
