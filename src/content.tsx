@@ -28,6 +28,7 @@ import Paid from "@mui/icons-material/Paid";
 import Payments from "@mui/icons-material/Payments";
 import { ChipsArray } from "./components/App/Tags";
 import Stack from "@mui/material/Stack";
+import { Grid2 } from "@mui/material";
 
 // Initialize storage manager
 const storageManager = new StorageManager();
@@ -137,61 +138,71 @@ async function processNavbar() {
 
   (toolsBar as HTMLElement).style.height = "auto";
 
-  const insideToolBar = toolsBar.firstElementChild as HTMLDivElement;
-  insideToolBar.style.alignItems = "end";
+  // const insideToolBar = toolsBar.firstElementChild as HTMLDivElement;
+  // insideToolBar.style.alignItems = "end";
 
   const container = document.createElement("div");
-  insideToolBar.insertBefore(container, insideToolBar.children[1]);
+  toolsBar.prepend(container);
   
   ReactDOM.render(
     <ThemeProvider theme={getTheme()}>
-      <Stack spacing={2} direction="row">
-    <FilterDropdown
-      label={"Media types"}
-      options={[
-        [Image, "Images"],
-        [VideoLibrary, "Videos"],
-        [PictureAsPdf, "Documents"],
-        [Web, "Websites"],
-      ]}
-    />
-    <FilterDropdown
-      label={"Subjects"}
-      options={[
-        [Palette, "Expressive arts"],
-        [Diversity3, "Social studies"],
-        [Science, "Sciences"],
-        [Spa, "Health and wellbeing"],
-        [Translate, "Languages"],
-        [Synagogue, "Religious and moral education"],
-        [Calculate, "Numeracy and mathematics"],
-        [Handyman, "Technologies"],
-      ]}
-    />
-    <FilterDropdown
-      label={"Levels"}
-      options={[
-        [null, "BGE Early (ELC and P1)"],
-        [null, "BGE First (P2-P4)"],
-        [null, "BGE Second (P5-P7)"],
-        [null, "BGE Third (S1-S3)"],
-        [null, "National 3 (S3)"],
-        [null, "National 4 (S4)"],
-        [null, "National 5 (S4)"],
-        [null, "Higher (S5-S6)"],
-        [null, "Advanced Higher (S5-S6)"],
-      ]}
-    />,
-    <FilterDropdown
-      label={"Cost"}
-      options={[
-        [MoneyOff, "Free"],
-        [Payments, "Subscription"],
-        [Paid, "Paid"],
-      ]}
-    />
-    </Stack>
-  </ThemeProvider>, container);
+      <Grid2 container spacing={2} sx={{ marginX: "var(--center-abs-margin)" }}>
+        <Grid2 size={3}>
+        <FilterDropdown
+          label={"Media types"}
+          options={[
+            [Image, "Images"],
+            [VideoLibrary, "Videos"],
+            [PictureAsPdf, "Documents"],
+            [Web, "Websites"],
+          ]}
+        />
+        </Grid2>
+        <Grid2 size={3}>
+        <FilterDropdown
+          label={"Subjects"}
+          options={[
+            [Palette, "Expressive arts"],
+            [Diversity3, "Social studies"],
+            [Science, "Sciences"],
+            [Spa, "Health and wellbeing"],
+            [Translate, "Languages"],
+            [Synagogue, "Religious and moral education"],
+            [Calculate, "Numeracy and mathematics"],
+            [Handyman, "Technologies"],
+          ]}
+        />
+        </Grid2>
+        <Grid2 size={3}>
+        <FilterDropdown
+          label={"Levels"}
+          options={[
+            [null, "BGE Early (ELC and P1)"],
+            [null, "BGE First (P2-P4)"],
+            [null, "BGE Second (P5-P7)"],
+            [null, "BGE Third (S1-S3)"],
+            [null, "National 3 (S3)"],
+            [null, "National 4 (S4)"],
+            [null, "National 5 (S4)"],
+            [null, "Higher (S5-S6)"],
+            [null, "Advanced Higher (S5-S6)"],
+          ]}
+        />
+        </Grid2>
+        <Grid2 size={3}>
+        <FilterDropdown
+          label={"Cost"}
+          options={[
+            [MoneyOff, "Free"],
+            [Payments, "Subscription"],
+            [Paid, "Paid"],
+          ]}
+        />
+        </Grid2>
+      </Grid2>
+    </ThemeProvider>,
+    container
+  );
 
   return toolsBar;
 }

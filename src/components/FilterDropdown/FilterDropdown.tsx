@@ -45,7 +45,7 @@ function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
 
   return (
         <Autocomplete
-          sx={{ fontSize: 14, marginLeft: 1, marginRight: 1 }}
+          sx={{ fontSize: 14 }}
           size="small"
           multiple
           limitTags={1}
