@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { withStyles } from 'tss-react/mui';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -43,6 +42,8 @@ import MoneyOff from "@mui/icons-material/MoneyOff";
 import Paid from "@mui/icons-material/Paid";
 import Payments from "@mui/icons-material/Payments";
 
+import { FilterData } from "../../types";
+
 const styles = {
   root: {
     flexGrow: 1,
@@ -68,11 +69,6 @@ interface Props {
   currentTabUrl: string | null;
 }
 
-interface ChipData {
-  key: number;
-  label: string;
-}
-
 const subjects = [
   "Expressive Arts",
   "Social studies",
@@ -96,17 +92,21 @@ const levels = [
   "Advanced Higher (S5-S6)",
 ];
 
-export function ChipsArray({ initData }: { initData: ChipData[] }) {
-  const [chipData, setChipData] = React.useState<readonly ChipData[]>(initData);
+export function ChipsArray({ initData }: { initData: FilterData[] | null }) {
+  if (!initData) {
+    return null;
+  }
+  
+  const [chipData, setChipData] = React.useState<readonly FilterData[]>(initData);
 
-  const handleDelete = (chipToDelete: ChipData) => () => {
-    setChipData((chips) => chips.filter((chip) => chip.key !== chipToDelete.key));
+  const handleDelete = (chipToDelete: FilterData) => () => {
+    setChipData((chips) => chips.filter((chip) => chip.type !== chipToDelete.type));
   };
 
   return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {chipData.map((data) => (
-                <Chip key={data.key} label={data.label} />
+                <Chip key={data.type} label={data.tag} />
               ))}
             </Box>
     // <Paper

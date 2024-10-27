@@ -1,7 +1,6 @@
-import { DisplayStyle, Color } from '../types';
 import 'chrome-storage-promise';
-import { Domain } from '../types/index';
-import { ChipData, LOCAL_STORAGE, SYNC_STORAGE } from '../constants';
+import { Domain, DisplayStyle, Color, FilterData } from '../types';
+import { LOCAL_STORAGE, SYNC_STORAGE } from '../constants';
 
 
 type StorageType = LOCAL_STORAGE | SYNC_STORAGE ;
@@ -49,12 +48,12 @@ export default class StorageManager {
       .then((res: any) => res.options as any || {});
   }
 
-  public async fetchTags(): Promise<{[key: string]: ChipData[]}> {
+  public async fetchTags(): Promise<{[key: string]: FilterData[]}> {
     const result = await this._browserStorage[this.storageType].get('tags');
-    return result.tags;
+    return result.tags || {};
   }
 
-  public async saveTags(tags: {[key: string]: ChipData[]}) {
+  public async saveTags(tags: {[key: string]: FilterData[]}) {
     return await this._browserStorage[this.storageType].set({ tags });
   }
 

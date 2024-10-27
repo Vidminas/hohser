@@ -1,9 +1,8 @@
 import StorageManager from "./content/storageManager";
-import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters } from "./types";
+import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData } from "./types";
 import * as config from "./config";
-import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, LOCAL_STORAGE, SYNC_STORAGE, ChipData } from "./constants";
+import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_1, LOCAL_STORAGE, SYNC_STORAGE } from "./constants";
 import './content.scss';
-import { Options } from './types';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { ResultManagement } from './components/Content/ResultManagement';
@@ -28,19 +27,19 @@ import MoneyOff from "@mui/icons-material/MoneyOff";
 import Paid from "@mui/icons-material/Paid";
 import Payments from "@mui/icons-material/Payments";
 import { ChipsArray } from "./components/App/Tags";
-import Stack from "@mui/material/Stack";
 import { Grid2 } from "@mui/material";
-
-// Initialize storage manager
-const storageManager = new StorageManager();
-let options: Options;
 
 // Determine search engine and apply right config
 const searchEngine = (location.host.match(/([^.]+)\.\w{2,3}(?:\.\w{2})?$/) || [])[1];
 const searchEngineConfig: SearchEngineConfig = config[searchEngine];
-
-// Array of management component anchors
-const managementComponentAnchors: Array<Element> = [];
+const tagBars: Array<Element> = [];
+const storageManager = new StorageManager();
+let options: Options;
+let tagData: {[key: string]: FilterData[]};
+let selectedFilters: {[key: string]: Set<string>} = {};
+// Check if Firefox or Chrome and assign the right storage object
+const browserStorageSync = ((typeof browser !== 'undefined') && browser.storage.sync) ||
+                         ((typeof chrome !== 'undefined') && (chrome.storage as any).promise.sync);
 
 let theme: Theme;
 const getTheme = () => {
@@ -91,6 +90,7 @@ async function processNavbar() {
             [PictureAsPdf, "Documents"],
             [Web, "Websites"],
           ]}
+          onChange={(selections) => null}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -106,6 +106,7 @@ async function processNavbar() {
             [Calculate, "Numeracy and mathematics"],
             [Handyman, "Technologies"],
           ]}
+          onChange={(selections) => null}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -122,6 +123,7 @@ async function processNavbar() {
             [null, "Higher (S5-S6)"],
             [null, "Advanced Higher (S5-S6)"],
           ]}
+          onChange={(selections) => null}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -132,6 +134,10 @@ async function processNavbar() {
             [Payments, "Subscription"],
             [Paid, "Paid"],
           ]}
+          onChange={(selections) => {
+            selectedFilters["cost"] = selections;
+            processResults(tagData, options);
+          }}
         />
         </Grid2>
       </Grid2>
@@ -201,10 +207,8 @@ function removeResultStyle (
   result.style.boxShadow = '';
 }
 
-const fetchedMap = {};
-
 // Process one result
-function processResult (r: Element, domainList: any, options: any, processResultsAttempt: number): DisplayStyle | null {
+function processResult (r: Element, tagData: {[key: string]: FilterData[]}, options: any, processResultsAttempt: number): DisplayStyle | null {
   let displayStyle: DisplayStyle | null = null;
   try {
     const result = r as HTMLElement;
@@ -226,55 +230,75 @@ function processResult (r: Element, domainList: any, options: any, processResult
       throw new Error("No domain info");
     }
 
-    let matchedString: string | null = null;
+    // let matchedString: string | null = null;
 
-    if (!fetchedMap[url]) {
-      fetchedMap[url] = true;
-      chrome.runtime.sendMessage({type: "searchResult", url: url}, (tags: ChipData[]) => {
-        const badge = document.createElement("div");
-        ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} /></ThemeProvider>, badge);
-        result.parentElement.insertBefore(badge, result);
+    console.log("Processing result", url);
+    if (!(url in tagData)) {
+      chrome.runtime.sendMessage({type: "searchResult", url: url}, (response: FilterData[]) => {
+        console.log("Got new tags for", url, response);
+        tagData[url] = response;
+        storageManager.saveTags(tagData);
+        processResult(r, tagData, options, processResultsAttempt);
       });
-    }
-
-    // Add or remove classes to matches results
-    const matches = domainList.filter((s: Domain) => url.includes(s.domainName));
-    if (matches.length > 0) {
-      const domain = matches.reduce(function (a: Domain, b: Domain) { return a.domainName.length > b.domainName.length ? a : b; });
-      removeResultStyle(result);
-      applyResultStyle(result, domain.color, domain.display, options);
-      matchedString = domain.domainName;
-      displayStyle = domain.display;
-    } else {
-      removeResultStyle(result);
-    }
-
-    // Add management component to the result
-    const managementComponentAnchor = result.appendChild(document.createElement("span"));
-    managementComponentAnchor.classList.add("hohser_result_management");
-    managementComponentAnchors.push(managementComponentAnchor);
-
-    // Listen to management component buttons click and stop event propagation
-    function handleManagementComponentClick(e: React.MouseEvent<HTMLButtonElement>, action: string, color: string | null, domain: string): void {
-      e.preventDefault();
-      e.stopPropagation();
-      if (action === "REMOVE_DOMAIN") {
-        storageManager.removeEntry(matchedString);
-      } else if (action === "FULL_HIDE" || action === "PARTIAL_HIDE" || action === "HIGHLIGHT") {
-        storageManager.save(domain, action, color);
+      return displayStyle;
+    } 
+    
+    const tags = tagData[url];
+    const badge = document.createElement("div");
+    ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} /></ThemeProvider>, badge);
+    result.parentElement.insertBefore(badge, result);
+    for (const [filterType, selections] of Object.entries(selectedFilters)) {
+      if (selections.size) {
+        const relevantTags = tags.filter(tag => tag.type === filterType).map(tag => tag.tag);
+        removeResultStyle(result);
+        if (relevantTags.find(tag => selections.has(tag))) {
+          console.log("Matches filter");
+          applyResultStyle(result, COLOR_1, HIGHLIGHT, options);
+        } else if (relevantTags.length) {
+          applyResultStyle(result, "", PARTIAL_HIDE, options);
+        }
       }
     }
+    tagBars.push(badge);
 
-    ReactDOM.render(
-      <ResultManagement url={url} showDeleteButton={!!matchedString} handleClick={handleManagementComponentClick} />,
-      managementComponentAnchor as HTMLElement
-    );
+    // Add or remove classes to matches results
+    // const matches = domainList.filter((s: Domain) => url.includes(s.domainName));
+    // if (matches.length > 0) {
+    //   const domain = matches.reduce(function (a: Domain, b: Domain) { return a.domainName.length > b.domainName.length ? a : b; });
+    //   removeResultStyle(result);
+    //   applyResultStyle(result, domain.color, domain.display, options);
+    //   matchedString = domain.domainName;
+    //   displayStyle = domain.display;
+    // } else {
+    //   removeResultStyle(result);
+    // }
+
+    // // Add management component to the result
+    // const managementComponentAnchor = result.appendChild(document.createElement("span"));
+    // managementComponentAnchor.classList.add("hohser_result_management");
+    // managementComponentAnchors.push(managementComponentAnchor);
+
+    // // Listen to management component buttons click and stop event propagation
+    // function handleManagementComponentClick(e: React.MouseEvent<HTMLButtonElement>, action: string, color: string | null, domain: string): void {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    //   if (action === "REMOVE_DOMAIN") {
+    //     storageManager.removeEntry(matchedString);
+    //   } else if (action === "FULL_HIDE" || action === "PARTIAL_HIDE" || action === "HIGHLIGHT") {
+    //     storageManager.save(domain, action, color);
+    //   }
+    // }
+
+    // ReactDOM.render(
+    //   <ResultManagement url={url} showDeleteButton={!!matchedString} handleClick={handleManagementComponentClick} />,
+    //   managementComponentAnchor as HTMLElement
+    // );
   } catch (e) {
     console.warn(e);
     // Try to process result again
     if (++processResultsAttempt <= 3) {
       setTimeout(() => {
-        processResult(r, domainList, options, processResultsAttempt);
+        processResult(r, tagData, options, processResultsAttempt);
       }, 100 * Math.pow(processResultsAttempt, 3));
     }
   }
@@ -282,7 +306,7 @@ function processResult (r: Element, domainList: any, options: any, processResult
 }
 
 // Process results function
-async function processResults (domainList: Domain[], options: Options): Promise<void> {
+async function processResults(tagData: {[key: string]: FilterData[]}, options: Options): Promise<void> {
   const domainsCounters: DomainsCounters = {fullHide: 0};
 
   const resultsList = document.querySelectorAll(
@@ -290,18 +314,18 @@ async function processResults (domainList: Domain[], options: Options): Promise<
   );
 
   // Clear managementComponent anchors
-  managementComponentAnchors.forEach(a => {
+  tagBars.forEach(a => {
     try{
       if (a.parentNode) a.parentNode.removeChild(a);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   });
 
   resultsList.forEach(r => {
     // Number of attempts to process results
     const processResultsAttempt: number = 0;
-    const displayStyle = processResult(r, domainList, options, processResultsAttempt);
+    const displayStyle = processResult(r, tagData, options, processResultsAttempt);
     if (displayStyle === FULL_HIDE) {
       domainsCounters.fullHide++;
     }
@@ -335,65 +359,55 @@ if (document.readyState !== 'complete') {
   // observer.observe(toolBar, { childList: true });
 }
 
-// Check if Firefox or Chrome and assign the right storage object
-const browserStorageSync = ((typeof browser !== 'undefined') && browser.storage.sync) ||
-                         ((typeof chrome !== 'undefined') && (chrome.storage as any).promise.sync);
-
 browserStorageSync.get('options')
-  .then((o: any) => {
-    options = o && o.options as Options;
+  .then((result: any) => {
+    options = result?.options as Options;
     const useLocalStorage = options && !!options.useLocalStorage;
     storageManager.storageType = useLocalStorage ? LOCAL_STORAGE : SYNC_STORAGE;
-    return storageManager.fetchDomainsList();
+    return storageManager.fetchTags();
   })
-  .then((d: Domain[]) => {
-    let domainList = d;
+  .then((result: {[key: string]: FilterData[]}) => {
+    tagData = result || {};
     // Initial process results
-    processResults(domainList, options);
-
-    // Re-process results on page load if it wasn't done initially
-    if (document.readyState !== 'complete') {
-      window.addEventListener('load', () => {
-        processResults(domainList, options);
-      });
-    }
+    processResults(tagData, options);
 
     // Process results on DOM change
     const targets = document.querySelectorAll(searchEngineConfig.observerSelector);
     targets.forEach(target => {
       const observer = new MutationObserver(function () {
-        processResults(domainList, options);
+        processResults(tagData, options);
       });
       if (target) observer.observe(target, { childList: true });
     });
 
     // Process results on storage change event
-    storageManager.oryginalBrowserStorage.onChanged.addListener((storage: any) => {
-      domainList = (storage.domainsList && storage.domainsList.newValue) || domainList;
-      options = (storage.options && storage.options.newValue) || options;
-      processResults(domainList, options);
-    });
+    // storageManager.oryginalBrowserStorage.onChanged.addListener((storage: any) => {
+    //   tagData = (storage.tags && storage.tags.newValue) || tagData;
+    //   // domainList = (storage.domainsList && storage.domainsList.newValue) || domainList;
+    //   options = (storage.options && storage.options.newValue) || options;
+    //   processResults(tagData, options);
+    // });
 
     // Process results on add new page by AutoPagerize extension
-    document.addEventListener("AutoPagerize_DOMNodeInserted", function () {
-      processResults(domainList, options);
-    }, false);
+    // document.addEventListener("AutoPagerize_DOMNodeInserted", function () {
+    //   processResults(domainList, options);
+    // }, false);
 
-    if (searchEngineConfig.ajaxResults) {
+    // if (searchEngineConfig.ajaxResults) {
 
-      // Observe resize event on result wrapper
-      let isResized: any;
-      const resizeObserver = new ResizeObserver(() => {
-        window.clearTimeout( isResized );
-        isResized = setTimeout(() => {
-          processResults(domainList, options);
-        }, 500);
-      });
+    //   // Observe resize event on result wrapper
+    //   let isResized: any;
+    //   const resizeObserver = new ResizeObserver(() => {
+    //     window.clearTimeout( isResized );
+    //     isResized = setTimeout(() => {
+    //       processResults(domainList, options);
+    //     }, 500);
+    //   });
 
-      const resultsWrappers = document.querySelectorAll(searchEngineConfig.observerSelector);
-      resultsWrappers.forEach(resultsWrapper => {
-        resizeObserver.observe(resultsWrapper);
-      });
+    //   const resultsWrappers = document.querySelectorAll(searchEngineConfig.observerSelector);
+    //   resultsWrappers.forEach(resultsWrapper => {
+    //     resizeObserver.observe(resultsWrapper);
+    //   });
 
-    }
+    // }
   });

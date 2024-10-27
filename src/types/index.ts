@@ -41,3 +41,22 @@ export interface StoreState {
 export interface DomainsCounters {
   fullHide: number;
 }
+
+export interface MediaTypeFilter {
+  type: 'MEDIA_TYPE';
+  tag: string;
+}
+export interface SubjectFilter {
+  type: 'SUBJECT';
+  tag: string;
+}
+export interface LevelFilter {
+  type: 'LEVEL';
+  tag: string;
+}
+export interface CostFilter {
+  type: 'COST';
+  tag: string;
+}
+
+export type FilterData = MediaTypeFilter | SubjectFilter | LevelFilter | CostFilter;

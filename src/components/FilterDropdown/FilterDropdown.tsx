@@ -1,11 +1,6 @@
 import * as React from 'react';
-import { withStyles } from 'tss-react/mui';
-import type { Theme } from '@mui/material';
-import InputLabel from '@mui/material/InputLabel';
 import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import SvgIcon from "@mui/material/SvgIcon";
 import ListItemText from '@mui/material/ListItemText';
@@ -26,28 +21,22 @@ const CustomPopper = (props) => (
 interface FilterDropdownProps {
   label: string;
   options: [typeof SvgIcon, string][];
+  onChange: (value: Set<string>) => void;
 }
 
-function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
-  const labelId = label.replace(' ', '-');
-  const [selections, setSelections] = React.useState<string[]>([]);
-  const optionsMap = React.useMemo(() => Object.fromEntries(options.map(x => [x[1], x[0]])), [options]);
-
-  const handleChange = (event: SelectChangeEvent<typeof selections>) => {
-    const {
-      target: { value },
-    } = event;
-    setSelections(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
-  };
+function FilterDropdown({ label, options, onChange }: FilterDropdownProps) {
+  const [selections, setSelections] = React.useState<typeof options>([]);
 
   return (
         <Autocomplete
           sx={{ fontSize: 14 }}
           size="small"
           multiple
+          value={selections}
+          onChange={(_event, newValue) => {
+            setSelections(newValue);
+            onChange(new Set(newValue.map(x => x[1])));
+          }}
           limitTags={1}
           options={options}
           disableClearable
@@ -81,4 +70,4 @@ function MultipleSelectCheckmarks({ label, options }: FilterDropdownProps) {
   );
 }
 
-export default MultipleSelectCheckmarks;
+export default FilterDropdown;

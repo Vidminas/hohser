@@ -106,11 +106,6 @@ export type GET_CURRENT_URL = typeof GET_CURRENT_URL;
 export const GET_CURRENT_URL_FULFILLED = 'GET_CURRENT_URL_FULFILLED';
 export type GET_CURRENT_URL_FULFILLED = typeof GET_CURRENT_URL_FULFILLED;
 
-export interface ChipData {
-  key: number;
-  label: string;
-}
-
 export const SUBJECTS = [
   "Expressive arts",
   "Social studies",
