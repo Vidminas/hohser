@@ -10,6 +10,7 @@ import { ResultManagement } from './components/Content/ResultManagement';
 import { ResizeObserver } from './mock/ResizeObserver';
 import { DomainsCounter } from './components/Content/DomainsCounter';
 import FilterDropdown from './components/FilterDropdown/FilterDropdown';
+import { getPageColorMode, waitForElement } from './content/common';
 import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
 import Image from "@mui/icons-material/Image";
 import VideoLibrary from "@mui/icons-material/VideoLibrary";
@@ -42,82 +43,16 @@ const searchEngineConfig: SearchEngineConfig = config[searchEngine];
 const managementComponentAnchors: Array<Element> = [];
 
 let theme: Theme;
-
 const getTheme = () => {
   if (theme) {
     return theme;
   }
-
-  // Approach inspired by https://github.com/code-charity/dark-mode/blob/master/content-scripts/filters.js
-  const colors = [];
-  let isDark = false;
-
-  function parse(element: Element, depth: number, depth_limit: number) {
-    depth++;
-
-    for (let i = 0, l = element.children.length; i < l; i++) {
-      const child = element.children[i];
-      const rect = child.getBoundingClientRect();
-
-      if (
-        rect.width >= document.body.offsetWidth &&
-        rect.height >= window.innerHeight
-      ) {
-        colors.push(getComputedStyle(child).backgroundColor);
-      }
-
-      if (depth < depth_limit && child.children) {
-        parse(child, depth, depth_limit);
-      }
-    }
-  }
-
-  colors.push(getComputedStyle(document.documentElement).backgroundColor);
-  colors.push(getComputedStyle(document.body).backgroundColor);
-  parse(document.body, 0, 3);
-
-  for (const color of colors) {
-    const arr = color.split("(")[1].split(")")[0].split(",");
-    if (arr.length < 4 || parseFloat(arr[3]) > 0.5) {
-      const r = parseInt(arr[0]) / 255;
-      const g = parseInt(arr[1]) / 255;
-      const b = parseInt(arr[2]) / 255;
-      const lightness = (Math.max(r, g, b) + Math.min(r, g, b)) / 2;
-      if (lightness < 0.5) {
-        isDark = true;
-        break;
-      }
-    }
-  }
-
   theme = createTheme({
     palette: {
-      mode: isDark ? 'dark' : 'light',
+      mode: getPageColorMode(),
     },
   });
   return theme;
-}
-
-// From https://stackoverflow.com/questions/5525071/how-to-wait-until-an-element-exists
-function waitForElement(selector: string): Promise<Element> {
-  return new Promise(resolve => {
-      if (document.querySelector(selector)) {
-          return resolve(document.querySelector(selector));
-      }
-
-      const observer = new MutationObserver(mutations => {
-          if (document.querySelector(selector)) {
-              observer.disconnect();
-              resolve(document.querySelector(selector));
-          }
-      });
-
-      // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
-      observer.observe(document.body, {
-          childList: true,
-          subtree: true
-      });
-  });
 }
 
 async function processNavbar() {

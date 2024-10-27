@@ -1,5 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
@@ -34,6 +38,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 import StorageManager from "./content/storageManager";
 import { Options } from './types';
 import { LOCAL_STORAGE, SYNC_STORAGE } from "./constants";
+import { getPageColorMode } from "./content/common";
+
 
 interface TagType {
   label: string;
@@ -137,7 +143,7 @@ const tagTypes: TagType[] = [
 const TagBar = () => {
   return (
     <>
-    <Stack direction="row" sx={{ backgroundColor: "firebrick" }}>
+    <Stack direction="row" sx={{ backgroundColor: theme.palette.background.paper }}>
       {tagTypes.map((tagType) => (
         <span key={tagType.label}>
           <Typography variant="h6">{tagType.label}</Typography>
@@ -159,14 +165,133 @@ const TagBar = () => {
   );
 };
 
+
+const hasPositionedParent = (el: Element) => {
+	if (el.tagName === "BODY") {
+    return false;
+  }
+	if (getComputedStyle(el.parentElement).position !== "static") {
+		return true;
+	}
+	return hasPositionedParent(el.parentElement);
+};
+
+const skipPositionedChild = (el: HTMLElement) => {
+	if (el.offsetParent && el.offsetParent.tagName !== "BODY") {
+    return true;
+  }
+	if (hasPositionedParent(el)) {
+    return true;
+  }
+	return false;
+};
+
+const height = "72px";
+
+const pageElements = document.body.getElementsByTagName("*") as HTMLCollectionOf<HTMLElement>;
+for (const pageElement of pageElements) {
+  const styles = getComputedStyle(pageElement);
+
+  if ((styles.position === "absolute" || styles.position === "fixed") && styles.top !== "auto") {
+    if ((styles.position === "absolute" && !skipPositionedChild(pageElement)) || (styles.position === "fixed" && styles.top !== height)) {
+      // if (styles.top !== "0px") {
+      //   pageElement.setAttribute("data-original-top", styles.top);
+      //   pageElement.style.top = parseInt(styles.top, 10) + parseInt(height, 10) + "px";
+      // }
+      if (styles.marginTop !== "") {
+        pageElement.setAttribute("data-original-mt", styles.marginTop);
+        pageElement.style.marginTop = parseInt(styles.marginTop, 10) + parseInt(height, 10) + "px";
+      } else if (styles.marginBottom !== "") {
+        pageElement.setAttribute("data-original-mb", styles.marginBottom);
+        pageElement.style.marginBottom = parseInt(styles.marginBottom, 10) + parseInt(height, 10) + "px";
+      }
+      if (styles.height !== "0px" && styles.top === "0px" && styles.bottom === "0px") {
+        pageElement.setAttribute("data-original-height", styles.height);
+        pageElement.style.height = "calc( " + styles.height + " - " + height + ")";
+      }
+    }
+  }
+}
+
+const topbarContainer = document.createElement("topbar-container");
+topbarContainer.role = "toolbar";
+topbarContainer.style.position = "fixed";
+topbarContainer.style.border = "none";
+topbarContainer.style.height = height;
+topbarContainer.style.top = "0px";
+topbarContainer.style.left = "0px";
+topbarContainer.style.zIndex = "2147483647";
+topbarContainer.style.width = "100%";
+topbarContainer.style.boxSizing = "border-box";
+topbarContainer.style.boxShadow = "0 2px 10px rgba(0, 0, 0, 0.2)";
+
+document.documentElement.appendChild(topbarContainer);
+topbarContainer.attachShadow({ mode: "open" });
+
+const topbarSpacer = document.createElement("div");
+topbarSpacer.style.height = height;
+topbarSpacer.style.width = "100%";
+topbarSpacer.style.display = "block";
+document.body.prepend(topbarSpacer);
+
 const topbar = document.createElement("div");
-document.body.prepend(topbar);
-ReactDOM.render(<TagBar />, topbar);
+topbarContainer.shadowRoot.appendChild(topbar);
 
-// Initialize storage manager
-const storageManager = new StorageManager();
-let options: Options;
+const cache = createCache({
+  key: "topbar-css",
+  prepend: true,
+  container: topbarContainer.shadowRoot,
+})
+const theme = createTheme({
+  cssVariables: {
+    rootSelector: ":host",
+    colorSchemeSelector: "class",
+  },
+  components: {
+    MuiPopover: {
+      defaultProps: {
+        container: topbar,
+      },
+    },
+    MuiPopper: {
+      defaultProps: {
+        container: topbar,
+      },
+    },
+    MuiModal: {
+      defaultProps: {
+        container: topbar,
+      },
+    },
+  },
+  palette: {
+    mode: getPageColorMode(),
+  },
+});
 
-// Check if Firefox or Chrome and assign the right storage object
-const browserStorageSync = ((typeof browser !== 'undefined') && browser.storage.sync) ||
-                         ((typeof chrome !== 'undefined') && (chrome.storage as any).promise.sync);
+ReactDOM.render(
+  <CacheProvider value={cache}>
+    <ThemeProvider theme={theme}>
+      <TagBar />
+    </ThemeProvider>
+  </CacheProvider>,
+  topbar
+);
+
+
+// // Initialize storage manager
+// const storageManager = new StorageManager();
+// let options: Options;
+
+// // Check if Firefox or Chrome and assign the right storage object
+// const browserStorageSync = ((typeof browser !== 'undefined') && browser.storage.sync) ||
+//                          ((typeof chrome !== 'undefined') && (chrome.storage as any).promise.sync);
+
+// browserStorageSync.get('options')
+//   .then((o: any) => {
+//     options = o && o.options as Options;
+//     const useLocalStorage = options && !!options.useLocalStorage;
+//     storageManager.storageType = useLocalStorage ? LOCAL_STORAGE : SYNC_STORAGE;
+//     return storageManager.fetchTags(location.host);
+//   })
+//   .then((d: Domain[]) => {
