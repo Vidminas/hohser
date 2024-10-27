@@ -106,6 +106,18 @@ export type GET_CURRENT_URL = typeof GET_CURRENT_URL;
 export const GET_CURRENT_URL_FULFILLED = 'GET_CURRENT_URL_FULFILLED';
 export type GET_CURRENT_URL_FULFILLED = typeof GET_CURRENT_URL_FULFILLED;
 
+export const MEDIA_TYPE_FILTER_TYPE = 'MEDIA_TYPE';
+export type MEDIA_TYPE_FILTER_TYPE = typeof MEDIA_TYPE_FILTER_TYPE;
+
+export const SUBJECT_FILTER_TYPE = 'SUBJECT';
+export type SUBJECT_FILTER_TYPE = typeof SUBJECT_FILTER_TYPE;
+
+export const LEVEL_FILTER_TYPE = 'LEVEL';
+export type LEVEL_FILTER_TYPE = typeof LEVEL_FILTER_TYPE;
+
+export const COST_FILTER_TYPE = 'COST';
+export type COST_FILTER_TYPE = typeof COST_FILTER_TYPE;
+
 export const SUBJECTS = [
   "Expressive arts",
   "Social studies",

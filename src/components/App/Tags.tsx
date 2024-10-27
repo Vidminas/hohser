@@ -92,11 +92,11 @@ const levels = [
   "Advanced Higher (S5-S6)",
 ];
 
-export function ChipsArray({ initData }: { initData: FilterData[] | null }) {
+export function ChipsArray({ initData, highlightTags }: { initData: FilterData[] | null, highlightTags: string[] }) {
   if (!initData) {
     return null;
   }
-  
+
   const [chipData, setChipData] = React.useState<readonly FilterData[]>(initData);
 
   const handleDelete = (chipToDelete: FilterData) => () => {
@@ -106,7 +106,7 @@ export function ChipsArray({ initData }: { initData: FilterData[] | null }) {
   return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
               {chipData.map((data) => (
-                <Chip key={data.type} label={data.tag} />
+                <Chip key={data.type} label={data.tag} sx={highlightTags.find(h => h === data.tag) && { backgroundColor: "green" }} />
               ))}
             </Box>
     // <Paper

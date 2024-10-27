@@ -1,7 +1,7 @@
 import StorageManager from "./content/storageManager";
-import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData } from "./types";
+import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData, CostFilter } from "./types";
 import * as config from "./config";
-import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_1, LOCAL_STORAGE, SYNC_STORAGE } from "./constants";
+import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_2, LOCAL_STORAGE, SYNC_STORAGE, COST_FILTER_TYPE, LEVEL_FILTER_TYPE, SUBJECT_FILTER_TYPE, MEDIA_TYPE_FILTER_TYPE } from "./constants";
 import './content.scss';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -85,12 +85,15 @@ async function processNavbar() {
         <FilterDropdown
           label={"Media types"}
           options={[
-            [Image, "Images"],
-            [VideoLibrary, "Videos"],
-            [PictureAsPdf, "Documents"],
-            [Web, "Websites"],
+            [Image, "Image"],
+            [VideoLibrary, "Video"],
+            [PictureAsPdf, "Document"],
+            [Web, "Website"],
           ]}
-          onChange={(selections) => null}
+          onChange={(selections) => {
+            selectedFilters[MEDIA_TYPE_FILTER_TYPE] = selections;
+            processResults(tagData, options);
+          }}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -106,7 +109,10 @@ async function processNavbar() {
             [Calculate, "Numeracy and mathematics"],
             [Handyman, "Technologies"],
           ]}
-          onChange={(selections) => null}
+          onChange={(selections) => {
+            selectedFilters[SUBJECT_FILTER_TYPE] = selections;
+            processResults(tagData, options);
+          }}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -123,7 +129,10 @@ async function processNavbar() {
             [null, "Higher (S5-S6)"],
             [null, "Advanced Higher (S5-S6)"],
           ]}
-          onChange={(selections) => null}
+          onChange={(selections) => {
+            selectedFilters[LEVEL_FILTER_TYPE] = selections;
+            processResults(tagData, options);
+          }}
         />
         </Grid2>
         <Grid2 size={3}>
@@ -135,7 +144,7 @@ async function processNavbar() {
             [Paid, "Paid"],
           ]}
           onChange={(selections) => {
-            selectedFilters["cost"] = selections;
+            selectedFilters[COST_FILTER_TYPE] = selections;
             processResults(tagData, options);
           }}
         />
@@ -178,33 +187,36 @@ function applyResultStyle (
   });
   const alpha = 0.12;
   if (displayStyle === HIGHLIGHT && Array.isArray(domainColors[color])) {
-    result.classList.add("hohser_highlight");
-    result.setAttribute('style', `background-color: ${getRgbCss(domainColors[color], alpha)}${!options || options?.forceColors ? '!important' : ''}`);
-    result.style.transition = `.5s`;
-    result.style.boxShadow = `0 0 0 5px ${getRgbCss(domainColors[color], alpha)}`;
+    result.parentElement.classList.add("hohser_highlight");
+    result.parentElement.setAttribute('style', `background-color: ${getRgbCss(domainColors[color], alpha)}${!options || options?.forceColors ? '!important' : ''}`);
+    result.parentElement.style.transition = `.5s`;
+    result.parentElement.style.boxShadow = `0 0 0 5px ${getRgbCss(domainColors[color], alpha)}`;
   } else if (displayStyle === PARTIAL_HIDE) {
-    result.classList.add("hohser_partial_hide");
+    result.parentElement.classList.add("hohser_partial_hide");
     if (options?.partialHideOpacity) {
-      result.setAttribute('style', `opacity: ${options?.partialHideOpacity / 100}`);
+      result.parentElement.setAttribute('style', `opacity: ${options?.partialHideOpacity / 100}`);
     }
   } else if (displayStyle === FULL_HIDE && (!options || !options?.showAll)) {
-    result.classList.add("hohser_full_hide");
+    result.parentElement.classList.add("hohser_full_hide");
   } else if (displayStyle === FULL_HIDE && options && options?.showAll) {
-    result.classList.add("hohser_partial_hide");
+    result.parentElement.classList.add("hohser_partial_hide");
   } else if (!Array.isArray(domainColors[color])) {
-    result.classList.add(domainColors[color]);
+    result.parentElement.classList.add(domainColors[color]);
   }
+
+  result.style.background = 'none';
 }
 
 // Remove styles from result
 function removeResultStyle (
   result: HTMLElement
 ): void {
-  result.classList.remove("hohser_highlight");
-  result.classList.remove("hohser_partial_hide");
-  result.classList.remove("hohser_full_hide");
-  result.style.backgroundColor = '';
-  result.style.boxShadow = '';
+  result.parentElement.classList.remove("hohser_highlight");
+  result.parentElement.classList.remove("hohser_partial_hide");
+  result.parentElement.classList.remove("hohser_full_hide");
+  result.parentElement.style.backgroundColor = '';
+  result.parentElement.style.boxShadow = '';
+  result.style.background = '';
 }
 
 // Process one result
@@ -243,22 +255,27 @@ function processResult (r: Element, tagData: {[key: string]: FilterData[]}, opti
       return displayStyle;
     } 
     
+    removeResultStyle(result);
     const tags = tagData[url];
-    const badge = document.createElement("div");
-    ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} /></ThemeProvider>, badge);
-    result.parentElement.insertBefore(badge, result);
+    const matchingTags = [];
+  
     for (const [filterType, selections] of Object.entries(selectedFilters)) {
       if (selections.size) {
+        console.log(selections, tags);
         const relevantTags = tags.filter(tag => tag.type === filterType).map(tag => tag.tag);
-        removeResultStyle(result);
+        
         if (relevantTags.find(tag => selections.has(tag))) {
-          console.log("Matches filter");
-          applyResultStyle(result, COLOR_1, HIGHLIGHT, options);
-        } else if (relevantTags.length) {
+          applyResultStyle(result, COLOR_2, HIGHLIGHT, options);
+          matchingTags.push(relevantTags[0]);
+        } else if (relevantTags.length && !matchingTags.length) {
           applyResultStyle(result, "", PARTIAL_HIDE, options);
         }
       }
     }
+
+    const badge = document.createElement("div");
+    ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} highlightTags={matchingTags} /></ThemeProvider>, badge);
+    result.parentElement.insertBefore(badge, result);
     tagBars.push(badge);
 
     // Add or remove classes to matches results
