@@ -1,7 +1,7 @@
 import StorageManager from "./content/storageManager";
 import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters } from "./types";
 import * as config from "./config";
-import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, LOCAL_STORAGE, SYNC_STORAGE } from "./constants";
+import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, LOCAL_STORAGE, SYNC_STORAGE, ChipData } from "./constants";
 import './content.scss';
 import { Options } from './types';
 import * as React from 'react';
@@ -230,16 +230,11 @@ function processResult (r: Element, domainList: any, options: any, processResult
 
     if (!fetchedMap[url]) {
       fetchedMap[url] = true;
-      let t = '';
-      chrome.runtime.sendMessage({type: "searchResult", url: url}, (text: string)  => {
-        t = text;
-        // const parser = new DOMParser();
-        // const doc = parser.parseFromString(text, 'text/html');
+      chrome.runtime.sendMessage({type: "searchResult", url: url}, (tags: ChipData[]) => {
+        const badge = document.createElement("div");
+        ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} /></ThemeProvider>, badge);
+        result.parentElement.insertBefore(badge, result);
       });
-      console.log(url);
-      const badge = document.createElement("div");
-      ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray /></ThemeProvider>, badge);
-      result.parentElement.insertBefore(badge, result);
     }
 
     // Add or remove classes to matches results

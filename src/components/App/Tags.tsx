@@ -96,13 +96,8 @@ const levels = [
   "Advanced Higher (S5-S6)",
 ];
 
-export function ChipsArray() {
-  const [chipData, setChipData] = React.useState<readonly ChipData[]>([
-    { key: 0, label: 'Website' },
-    { key: 1, label: levels[Math.floor(Math.random() * levels.length)] },
-    { key: 2, label: subjects[Math.floor(Math.random() * subjects.length)] },
-    { key: 3, label: 'Free' },
-  ]);
+export function ChipsArray({ initData }: { initData: ChipData[] }) {
+  const [chipData, setChipData] = React.useState<readonly ChipData[]>(initData);
 
   const handleDelete = (chipToDelete: ChipData) => () => {
     setChipData((chips) => chips.filter((chip) => chip.key !== chipToDelete.key));

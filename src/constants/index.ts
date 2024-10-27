@@ -105,3 +105,31 @@ export type GET_CURRENT_URL = typeof GET_CURRENT_URL;
 
 export const GET_CURRENT_URL_FULFILLED = 'GET_CURRENT_URL_FULFILLED';
 export type GET_CURRENT_URL_FULFILLED = typeof GET_CURRENT_URL_FULFILLED;
+
+export interface ChipData {
+  key: number;
+  label: string;
+}
+
+export const SUBJECTS = [
+  "Expressive arts",
+  "Social studies",
+  "Sciences",
+  "Health and wellbeing",
+  "Languages",
+  "Religious and moral education",
+  "Numeracy and mathematics",
+  "Technologies",
+]
+
+export const LEVELS = [
+  "BGE Early (ELC and P1)",
+  "BGE First (P2-P4)",
+  "BGE Second (P5-P7)",
+  "BGE Third (S1-S3)",
+  "National 3 (S3)",
+  "National 4 (S4)",
+  "National 5 (S4)",
+  "Higher (S5-S6)",
+  "Advanced Higher (S5-S6)",
+];
