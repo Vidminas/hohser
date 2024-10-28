@@ -39,8 +39,11 @@ const tagTypes: TagType[] = [
     options: COST_FILTER_OPTIONS,
   },
 ];
-
-const TagBar = ({ filterData }: { filterData: FilterData[] }) => {
+interface TagBarProps {
+  filterData: FilterData[];
+  onSave: (tags: FilterData[]) => void;
+}
+const TagBar = ({ filterData, onSave }: TagBarProps) => {
   const theme = useTheme();
   const [tags, setTags] = React.useState(
     tagTypes.map((tagType) => ({
@@ -56,6 +59,7 @@ const TagBar = ({ filterData }: { filterData: FilterData[] }) => {
   };
 
   const handleSave = () => {
+    onSave(tags.flatMap((tagData) => tagData.selections.map((selection) => ({ type: tagData.label, tag: selection[1] }))));
     setUnsaved(false);
   };
 
@@ -76,12 +80,12 @@ const TagBar = ({ filterData }: { filterData: FilterData[] }) => {
             <FilterDropdown {...tagData} onChange={(selections) => handleChange(tagData, selections)} />
           </Grid2>
       ))}
-      <Grid2 size={1}>
+      <Grid2 size={1} marginY="auto">
         <Button variant="contained" endIcon={<SaveIcon />} disabled={!unsaved} onClick={handleSave}>
           Save
         </Button>
       </Grid2>
-      <Grid2 size={1}>
+      <Grid2 size={1} marginY="auto">
         <Button variant="contained" endIcon={<CancelIcon />} disabled={!unsaved} onClick={handleCancel}>
           Cancel
         </Button>
@@ -215,7 +219,10 @@ browserStorageSync.get('options')
     ReactDOM.render(
       <CacheProvider value={cache}>
         <ThemeProvider theme={theme}>
-          <TagBar filterData={url in filterData ? filterData[url] : []} />
+          <TagBar
+            filterData={url in filterData ? filterData[url] : []}
+            onSave={(tags) => storageManager.saveTags({ ...filterData, [url]: tags })}
+            />
         </ThemeProvider>
       </CacheProvider>,
       topbar

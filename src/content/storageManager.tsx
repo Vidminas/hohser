@@ -48,12 +48,12 @@ export default class StorageManager {
       .then((res: any) => res.options as any || {});
   }
 
-  public async fetchTags(): Promise<{[key: string]: FilterData[]}> {
+  public async fetchTags(): Promise<{[url: string]: FilterData[]}> {
     const result = await this._browserStorage[this.storageType].get('tags');
     return result.tags || {};
   }
 
-  public async saveTags(tags: {[key: string]: FilterData[]}) {
+  public async saveTags(tags: {[url: string]: FilterData[]}) {
     return await this._browserStorage[this.storageType].set({ tags });
   }
 
