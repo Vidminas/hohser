@@ -6,15 +6,17 @@ import { createTheme, useTheme, ThemeProvider } from '@mui/material/styles';
 
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import Button from "@mui/material/Button";
 import Grid2 from "@mui/material/Grid2";
+import Stack from "@mui/material/Stack";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import StorageManager from "./content/storageManager";
 import { Options, FilterData } from './types';
 import { COST_FILTER_OPTIONS, COST_FILTER_TYPE, FILTER_OPTIONS, FILTER_TYPE, LEVEL_FILTER_OPTIONS, LEVEL_FILTER_TYPE, LOCAL_STORAGE, MEDIA_TYPE_FILTER_OPTIONS, MEDIA_TYPE_FILTER_TYPE, SUBJECT_FILTER_OPTIONS, SUBJECT_FILTER_TYPE, SYNC_STORAGE } from "./constants";
 import { getPageColorMode } from "./content/common";
 import FilterDropdown from "./components/FilterDropdown/FilterDropdown";
-
 
 interface TagType {
   label: FILTER_TYPE;
@@ -52,6 +54,7 @@ const TagBar = ({ filterData, onSave }: TagBarProps) => {
     }))
   );
   const [unsaved, setUnsaved] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   const handleChange = (tagData: TagType, newSelections: FILTER_OPTIONS) => {
     setTags(tags.map((tag) => tag.label === tagData.label ? { ...tag, selections: newSelections } : tag));
@@ -71,24 +74,39 @@ const TagBar = ({ filterData, onSave }: TagBarProps) => {
     setUnsaved(false);
   };
 
+  const handleGenerate = () => {
+    setLoading(true);
+    chrome.runtime.sendMessage({ type: "generateTags", url: window.location.href }, (newTags: FilterData[]) => {
+      setTags(tagTypes.map((tagType) => ({
+        ...tagType,
+        selections: tagType.options.filter((option) => newTags.some((tag) => tag.type === tagType.label && tag.tag === option[1])),
+      })));
+      setLoading(false);
+      setUnsaved(true);
+    });
+  };
+
   return (
     <Grid2 container spacing={3} sx={{ backgroundColor: theme.palette.background.paper }}>
-      <Grid2 size={1}>
+      <Grid2 size={1} flexShrink={1}>
       </Grid2>
       {tags.map((tagData) => (
           <Grid2 size={2}>
             <FilterDropdown {...tagData} onChange={(selections) => handleChange(tagData, selections)} />
           </Grid2>
       ))}
-      <Grid2 size={1} marginY="auto">
-        <Button variant="contained" endIcon={<SaveIcon />} disabled={!unsaved} onClick={handleSave}>
-          Save
-        </Button>
-      </Grid2>
-      <Grid2 size={1} marginY="auto">
-        <Button variant="contained" endIcon={<CancelIcon />} disabled={!unsaved} onClick={handleCancel}>
-          Cancel
-        </Button>
+      <Grid2 size={3} marginY="auto">
+        <Stack direction="row" spacing={1}>
+          <Button size="small" variant="contained" endIcon={<SaveIcon />} disabled={!unsaved} onClick={handleSave}>
+            Save
+          </Button>
+          <Button size="small" variant="contained" endIcon={<CancelIcon />} disabled={!unsaved} onClick={handleCancel}>
+            Cancel
+          </Button>
+          <LoadingButton size="small" variant="contained" endIcon={<AutoFixHighIcon />} loading={loading} loadingPosition="end" onClick={handleGenerate}>
+            Generate
+          </LoadingButton>
+        </Stack>
       </Grid2>
     </Grid2>
   );
