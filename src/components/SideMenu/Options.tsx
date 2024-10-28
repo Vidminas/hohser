@@ -259,6 +259,14 @@ const Options: React.FC<Props> = (props) => {
     setNewColor(event.target.value);
   };
 
+  const handleClearData = (): void => {
+    const clear = confirm("Are you sure?");
+    if (clear) {
+      chrome.storage.sync.clear();
+      chrome.storage.local.clear();
+    }
+  };
+
   return (
     <>
       <List component="nav" key="list">
@@ -394,6 +402,13 @@ const Options: React.FC<Props> = (props) => {
           </List>
         </Collapse>
         <Divider />
+        <ListItemButton onClick={handleClearData}>
+          <ListItemIcon>
+            <DeleteIcon />
+          </ListItemIcon>
+          <ListItemText primary="Delete extension data" />
+          <WarningIcon fontSize="small" color="error" />
+        </ListItemButton>
         <ListItemButton onClick={handleExportDomains}>
           <ListItemIcon>
             <ExportImportIcon />
