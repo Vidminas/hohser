@@ -12,7 +12,7 @@ export default class StorageManager {
   // Oryginal chrome browser storage - to be able to listen onChange events in Chrome
   private _oryginalBrowserStorage = typeof browser === 'undefined' ? (chrome.storage as any) : browser.storage;
 
-  private _storageType: StorageType = SYNC_STORAGE;
+  private _storageType: StorageType = LOCAL_STORAGE;
 
   set storageType (storageType: StorageType) {
     this._storageType = storageType;
