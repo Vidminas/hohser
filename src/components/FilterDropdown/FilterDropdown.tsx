@@ -30,7 +30,12 @@ function FilterDropdown({ label, options, selected, onChange }: FilterDropdownPr
 
   return (
         <Autocomplete
-          sx={{ fontSize: 14 }}
+          sx={{
+            fontSize: 14,
+            "& .MuiAutocomplete-inputRoot:not(.Mui-focused)": {
+              flexWrap: "nowrap",
+            },
+          }}
           size="small"
           multiple
           value={selections}
@@ -49,7 +54,7 @@ function FilterDropdown({ label, options, selected, onChange }: FilterDropdownPr
           }
           renderInput={(params) => (
             <TextField {...params} variant="standard" size="small" label={label}
-              slotProps={{ inputLabel: { sx: { fontSize: 14 } } } }
+              slotProps={{ inputLabel: { sx: { fontSize: 14 } } }}
              />
           )}
           renderOption={(props, option, { selected }) => {
