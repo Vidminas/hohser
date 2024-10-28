@@ -4,16 +4,10 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { createTheme, useTheme, ThemeProvider } from '@mui/material/styles';
 
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { Box, Button, IconButton, ListItemButton, Stack, Typography } from "@mui/material";
-import { Grid2 } from "@mui/material";
+import Button from "@mui/material/Button";
+import Grid2 from "@mui/material/Grid2";
 
 import StorageManager from "./content/storageManager";
 import { Options, FilterData } from './types';
@@ -51,9 +45,27 @@ const TagBar = ({ filterData }: { filterData: FilterData[] }) => {
   const [tags, setTags] = React.useState(
     tagTypes.map((tagType) => ({
       ...tagType,
-      selected: new Set(filterData.filter((tag) => tag.type === tagType.label).map((tag) => tag.tag))
+      selections: tagType.options.filter((option) => filterData.some((tag) => tag.type === tagType.label && tag.tag === option[1])),
     }))
   );
+  const [unsaved, setUnsaved] = React.useState(false);
+
+  const handleChange = (tagData: TagType, newSelections: FILTER_OPTIONS) => {
+    setTags(tags.map((tag) => tag.label === tagData.label ? { ...tag, selections: newSelections } : tag));
+    setUnsaved(true);
+  };
+
+  const handleSave = () => {
+    setUnsaved(false);
+  };
+
+  const handleCancel = () => {
+    setTags(tagTypes.map((tagType) => ({
+      ...tagType,
+      selections: tagType.options.filter((option) => filterData.some((tag) => tag.type === tagType.label && tag.tag === option[1])),
+    })));
+    setUnsaved(false);
+  };
 
   return (
     <Grid2 container spacing={3} sx={{ backgroundColor: theme.palette.background.paper }}>
@@ -61,23 +73,16 @@ const TagBar = ({ filterData }: { filterData: FilterData[] }) => {
       </Grid2>
       {tags.map((tagData) => (
           <Grid2 size={2}>
-            <FilterDropdown {...tagData} onChange={(selections) => setTags([
-                ...tags.filter((tag) => tag.label !== tagData.label),
-                {
-                  ...tagData,
-                  selected: selections,
-                }
-              ])}
-            />
+            <FilterDropdown {...tagData} onChange={(selections) => handleChange(tagData, selections)} />
           </Grid2>
       ))}
       <Grid2 size={1}>
-        <Button variant="contained" endIcon={<SaveIcon />}>
+        <Button variant="contained" endIcon={<SaveIcon />} disabled={!unsaved} onClick={handleSave}>
           Save
         </Button>
       </Grid2>
       <Grid2 size={1}>
-        <Button variant="contained" endIcon={<CancelIcon />}>
+        <Button variant="contained" endIcon={<CancelIcon />} disabled={!unsaved} onClick={handleCancel}>
           Cancel
         </Button>
       </Grid2>

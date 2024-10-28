@@ -21,13 +21,11 @@ const CustomPopper = (props) => (
 interface FilterDropdownProps {
   label: FILTER_TYPE;
   options: FILTER_OPTIONS;
-  selected: Set<string>;
-  onChange: (value: Set<string>) => void;
+  selections: FILTER_OPTIONS;
+  onChange: (value: FILTER_OPTIONS) => void;
 }
 
-function FilterDropdown({ label, options, selected, onChange }: FilterDropdownProps) {
-  const [selections, setSelections] = React.useState<typeof options>(options.filter(x => selected.has(x[1])));
-
+function FilterDropdown({ label, options, selections, onChange }: FilterDropdownProps) {
   return (
         <Autocomplete
           sx={{
@@ -39,10 +37,7 @@ function FilterDropdown({ label, options, selected, onChange }: FilterDropdownPr
           size="small"
           multiple
           value={selections}
-          onChange={(_event, newValue) => {
-            setSelections(newValue);
-            onChange(new Set(newValue.map(x => x[1])));
-          }}
+          onChange={(_event, newValue) => onChange(newValue)}
           limitTags={1}
           options={options}
           disableClearable

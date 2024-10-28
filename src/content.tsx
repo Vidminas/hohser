@@ -1,7 +1,7 @@
 import StorageManager from "./content/storageManager";
 import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData } from "./types";
 import * as config from "./config";
-import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_2, LOCAL_STORAGE, SYNC_STORAGE, COST_FILTER_TYPE, LEVEL_FILTER_TYPE, SUBJECT_FILTER_TYPE, MEDIA_TYPE_FILTER_TYPE, SUBJECT_FILTER_OPTIONS, MEDIA_TYPE_FILTER_OPTIONS, LEVEL_FILTER_OPTIONS, COST_FILTER_OPTIONS } from "./constants";
+import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_2, LOCAL_STORAGE, SYNC_STORAGE, COST_FILTER_TYPE, LEVEL_FILTER_TYPE, SUBJECT_FILTER_TYPE, MEDIA_TYPE_FILTER_TYPE, SUBJECT_FILTER_OPTIONS, MEDIA_TYPE_FILTER_OPTIONS, LEVEL_FILTER_OPTIONS, COST_FILTER_OPTIONS, FILTER_OPTIONS } from "./constants";
 import './content.scss';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -39,6 +39,22 @@ const getTheme = () => {
   return theme;
 }
 
+const IndependentFilterDropdown = ({ label, options }) => {
+  const [selections, setSelections] = React.useState<FILTER_OPTIONS>([]);
+  return (
+    <FilterDropdown
+      label={label}
+      options={options}
+      selections={selections}
+      onChange={(newSelections) => {
+        selectedFilters[label] = new Set(newSelections.map(x => x[1]));
+        processResults(tagData, options);
+        setSelections(newSelections);
+      }}
+    />
+  );
+}
+
 async function processNavbar() {
   if (!searchEngineConfig.toolsBarSelector)
     return null;
@@ -67,47 +83,27 @@ async function processNavbar() {
     <ThemeProvider theme={getTheme()}>
       <Grid2 container spacing={2} sx={{ marginX: "var(--center-abs-margin)" }}>
         <Grid2 size={3}>
-        <FilterDropdown
+        <IndependentFilterDropdown
           label={MEDIA_TYPE_FILTER_TYPE}
           options={MEDIA_TYPE_FILTER_OPTIONS}
-          selected={new Set()}
-          onChange={(selections) => {
-            selectedFilters[MEDIA_TYPE_FILTER_TYPE] = selections;
-            processResults(tagData, options);
-          }}
         />
         </Grid2>
         <Grid2 size={3}>
-        <FilterDropdown
+        <IndependentFilterDropdown
           label={SUBJECT_FILTER_TYPE}
           options={SUBJECT_FILTER_OPTIONS}
-          selected={new Set()}
-          onChange={(selections) => {
-            selectedFilters[SUBJECT_FILTER_TYPE] = selections;
-            processResults(tagData, options);
-          }}
         />
         </Grid2>
         <Grid2 size={3}>
-        <FilterDropdown
+        <IndependentFilterDropdown
           label={LEVEL_FILTER_TYPE}
           options={LEVEL_FILTER_OPTIONS}
-          selected={new Set()}
-          onChange={(selections) => {
-            selectedFilters[LEVEL_FILTER_TYPE] = selections;
-            processResults(tagData, options);
-          }}
         />
         </Grid2>
         <Grid2 size={3}>
-        <FilterDropdown
+        <IndependentFilterDropdown
           label={COST_FILTER_TYPE}
           options={COST_FILTER_OPTIONS}
-          selected={new Set()}
-          onChange={(selections) => {
-            selectedFilters[COST_FILTER_TYPE] = selections;
-            processResults(tagData, options);
-          }}
         />
         </Grid2>
       </Grid2>
