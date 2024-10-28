@@ -106,37 +106,70 @@ export type GET_CURRENT_URL = typeof GET_CURRENT_URL;
 export const GET_CURRENT_URL_FULFILLED = 'GET_CURRENT_URL_FULFILLED';
 export type GET_CURRENT_URL_FULFILLED = typeof GET_CURRENT_URL_FULFILLED;
 
-export const MEDIA_TYPE_FILTER_TYPE = 'MEDIA_TYPE';
+export const MEDIA_TYPE_FILTER_TYPE = 'Media type';
 export type MEDIA_TYPE_FILTER_TYPE = typeof MEDIA_TYPE_FILTER_TYPE;
 
-export const SUBJECT_FILTER_TYPE = 'SUBJECT';
+export const SUBJECT_FILTER_TYPE = 'Subject';
 export type SUBJECT_FILTER_TYPE = typeof SUBJECT_FILTER_TYPE;
 
-export const LEVEL_FILTER_TYPE = 'LEVEL';
+export const LEVEL_FILTER_TYPE = 'Level';
 export type LEVEL_FILTER_TYPE = typeof LEVEL_FILTER_TYPE;
 
-export const COST_FILTER_TYPE = 'COST';
+export const COST_FILTER_TYPE = 'Cost';
 export type COST_FILTER_TYPE = typeof COST_FILTER_TYPE;
 
-export const SUBJECTS = [
-  "Expressive arts",
-  "Social studies",
-  "Sciences",
-  "Health and wellbeing",
-  "Languages",
-  "Religious and moral education",
-  "Numeracy and mathematics",
-  "Technologies",
-]
+export type FILTER_TYPE = MEDIA_TYPE_FILTER_TYPE | SUBJECT_FILTER_TYPE | LEVEL_FILTER_TYPE | COST_FILTER_TYPE;
 
-export const LEVELS = [
-  "BGE Early (ELC and P1)",
-  "BGE First (P2-P4)",
-  "BGE Second (P5-P7)",
-  "BGE Third (S1-S3)",
-  "National 3 (S3)",
-  "National 4 (S4)",
-  "National 5 (S4)",
-  "Higher (S5-S6)",
-  "Advanced Higher (S5-S6)",
+import SvgIcon from "@mui/material/SvgIcon";
+export type FILTER_OPTIONS = [typeof SvgIcon, string][];
+
+import Image from "@mui/icons-material/Image";
+import VideoLibrary from "@mui/icons-material/VideoLibrary";
+import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
+import Web from "@mui/icons-material/Web";
+import Palette from "@mui/icons-material/Palette";
+export const MEDIA_TYPE_FILTER_OPTIONS: FILTER_OPTIONS = [
+  [Image, "Image"],
+  [VideoLibrary, "Video"],
+  [PictureAsPdf, "Document"],
+  [Web, "Website"],
+];
+
+import Diversity3 from "@mui/icons-material/Diversity3";
+import Science from "@mui/icons-material/Science";
+import Spa from "@mui/icons-material/Spa";
+import Translate from "@mui/icons-material/Translate";
+import Synagogue from "@mui/icons-material/Synagogue";
+import Calculate from "@mui/icons-material/Calculate";
+import Handyman from "@mui/icons-material/Handyman";
+export const SUBJECT_FILTER_OPTIONS: FILTER_OPTIONS = [
+  [Palette, "Expressive arts"],
+  [Diversity3, "Social studies"],
+  [Science, "Sciences"],
+  [Spa, "Health and wellbeing"],
+  [Translate, "Languages"],
+  [Synagogue, "Religious and moral education"],
+  [Calculate, "Numeracy and mathematics"],
+  [Handyman, "Technologies"],
+];
+
+export const LEVEL_FILTER_OPTIONS: FILTER_OPTIONS = [
+  [null, "BGE Early (ELC and P1)"],
+  [null, "BGE First (P2-P4)"],
+  [null, "BGE Second (P5-P7)"],
+  [null, "BGE Third (S1-S3)"],
+  [null, "National 3 (S3)"],
+  [null, "National 4 (S4)"],
+  [null, "National 5 (S4)"],
+  [null, "Higher (S5-S6)"],
+  [null, "Advanced Higher (S5-S6)"],
+];
+
+import MoneyOff from "@mui/icons-material/MoneyOff";
+import Paid from "@mui/icons-material/Paid";
+import Payments from "@mui/icons-material/Payments";
+export const COST_FILTER_OPTIONS: FILTER_OPTIONS = [
+  [MoneyOff, "Free"],
+  [Payments, "Subscription"],
+  [Paid, "Paid"],
 ];

@@ -1,7 +1,7 @@
 import StorageManager from "./content/storageManager";
-import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData, CostFilter } from "./types";
+import { SearchEngineConfig, DisplayStyle, Color, Domain, DomainsCounters, Options, FilterData } from "./types";
 import * as config from "./config";
-import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_2, LOCAL_STORAGE, SYNC_STORAGE, COST_FILTER_TYPE, LEVEL_FILTER_TYPE, SUBJECT_FILTER_TYPE, MEDIA_TYPE_FILTER_TYPE } from "./constants";
+import { PARTIAL_HIDE, FULL_HIDE, HIGHLIGHT, COLOR_2, LOCAL_STORAGE, SYNC_STORAGE, COST_FILTER_TYPE, LEVEL_FILTER_TYPE, SUBJECT_FILTER_TYPE, MEDIA_TYPE_FILTER_TYPE, SUBJECT_FILTER_OPTIONS, MEDIA_TYPE_FILTER_OPTIONS, LEVEL_FILTER_OPTIONS, COST_FILTER_OPTIONS } from "./constants";
 import './content.scss';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -11,21 +11,6 @@ import { DomainsCounter } from './components/Content/DomainsCounter';
 import FilterDropdown from './components/FilterDropdown/FilterDropdown';
 import { getPageColorMode, waitForElement } from './content/common';
 import { createTheme, Theme, ThemeProvider } from '@mui/material/styles';
-import Image from "@mui/icons-material/Image";
-import VideoLibrary from "@mui/icons-material/VideoLibrary";
-import PictureAsPdf from "@mui/icons-material/PictureAsPdf";
-import Web from "@mui/icons-material/Web";
-import Palette from "@mui/icons-material/Palette";
-import Diversity3 from "@mui/icons-material/Diversity3";
-import Science from "@mui/icons-material/Science";
-import Spa from "@mui/icons-material/Spa";
-import Translate from "@mui/icons-material/Translate";
-import Synagogue from "@mui/icons-material/Synagogue";
-import Calculate from "@mui/icons-material/Calculate";
-import Handyman from "@mui/icons-material/Handyman";
-import MoneyOff from "@mui/icons-material/MoneyOff";
-import Paid from "@mui/icons-material/Paid";
-import Payments from "@mui/icons-material/Payments";
 import { ChipsArray } from "./components/App/Tags";
 import { Grid2 } from "@mui/material";
 
@@ -83,13 +68,9 @@ async function processNavbar() {
       <Grid2 container spacing={2} sx={{ marginX: "var(--center-abs-margin)" }}>
         <Grid2 size={3}>
         <FilterDropdown
-          label={"Media types"}
-          options={[
-            [Image, "Image"],
-            [VideoLibrary, "Video"],
-            [PictureAsPdf, "Document"],
-            [Web, "Website"],
-          ]}
+          label={MEDIA_TYPE_FILTER_TYPE}
+          options={MEDIA_TYPE_FILTER_OPTIONS}
+          selected={new Set()}
           onChange={(selections) => {
             selectedFilters[MEDIA_TYPE_FILTER_TYPE] = selections;
             processResults(tagData, options);
@@ -98,17 +79,9 @@ async function processNavbar() {
         </Grid2>
         <Grid2 size={3}>
         <FilterDropdown
-          label={"Subjects"}
-          options={[
-            [Palette, "Expressive arts"],
-            [Diversity3, "Social studies"],
-            [Science, "Sciences"],
-            [Spa, "Health and wellbeing"],
-            [Translate, "Languages"],
-            [Synagogue, "Religious and moral education"],
-            [Calculate, "Numeracy and mathematics"],
-            [Handyman, "Technologies"],
-          ]}
+          label={SUBJECT_FILTER_TYPE}
+          options={SUBJECT_FILTER_OPTIONS}
+          selected={new Set()}
           onChange={(selections) => {
             selectedFilters[SUBJECT_FILTER_TYPE] = selections;
             processResults(tagData, options);
@@ -117,18 +90,9 @@ async function processNavbar() {
         </Grid2>
         <Grid2 size={3}>
         <FilterDropdown
-          label={"Levels"}
-          options={[
-            [null, "BGE Early (ELC and P1)"],
-            [null, "BGE First (P2-P4)"],
-            [null, "BGE Second (P5-P7)"],
-            [null, "BGE Third (S1-S3)"],
-            [null, "National 3 (S3)"],
-            [null, "National 4 (S4)"],
-            [null, "National 5 (S4)"],
-            [null, "Higher (S5-S6)"],
-            [null, "Advanced Higher (S5-S6)"],
-          ]}
+          label={LEVEL_FILTER_TYPE}
+          options={LEVEL_FILTER_OPTIONS}
+          selected={new Set()}
           onChange={(selections) => {
             selectedFilters[LEVEL_FILTER_TYPE] = selections;
             processResults(tagData, options);
@@ -137,12 +101,9 @@ async function processNavbar() {
         </Grid2>
         <Grid2 size={3}>
         <FilterDropdown
-          label={"Cost"}
-          options={[
-            [MoneyOff, "Free"],
-            [Payments, "Subscription"],
-            [Paid, "Paid"],
-          ]}
+          label={COST_FILTER_TYPE}
+          options={COST_FILTER_OPTIONS}
+          selected={new Set()}
           onChange={(selections) => {
             selectedFilters[COST_FILTER_TYPE] = selections;
             processResults(tagData, options);
@@ -384,7 +345,7 @@ browserStorageSync.get('options')
     return storageManager.fetchTags();
   })
   .then((result: {[key: string]: FilterData[]}) => {
-    tagData = result || {};
+    tagData = result;
     // Initial process results
     processResults(tagData, options);
 

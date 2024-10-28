@@ -2,12 +2,12 @@ import * as React from 'react';
 import Popper from '@mui/material/Popper';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
-import SvgIcon from "@mui/material/SvgIcon";
 import ListItemText from '@mui/material/ListItemText';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Chip from '@mui/material/Chip';
+import { FILTER_OPTIONS, FILTER_TYPE } from '../../constants';
 
 const CustomPopper = (props) => (
     <Popper
@@ -19,13 +19,14 @@ const CustomPopper = (props) => (
 
 
 interface FilterDropdownProps {
-  label: string;
-  options: [typeof SvgIcon, string][];
+  label: FILTER_TYPE;
+  options: FILTER_OPTIONS;
+  selected: Set<string>;
   onChange: (value: Set<string>) => void;
 }
 
-function FilterDropdown({ label, options, onChange }: FilterDropdownProps) {
-  const [selections, setSelections] = React.useState<typeof options>([]);
+function FilterDropdown({ label, options, selected, onChange }: FilterDropdownProps) {
+  const [selections, setSelections] = React.useState<typeof options>(options.filter(x => selected.has(x[1])));
 
   return (
         <Autocomplete
