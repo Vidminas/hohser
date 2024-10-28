@@ -11,12 +11,16 @@
     "@mui/material": "^6.1.4",
     "archiver": "^5.0.2",
     "chrome-storage-promise": "^0.1.0",
+    "html-to-text": "^9.0.5",
+    "openai": "^4.68.4",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-redux": "7.2.0",
     "redux-observable": "^1.0.0",
     "redux-promise-middleware": "6.1.2",
-    "tss-react": "^4.9.11"
+    "tss-react": "^4.9.11",
+    "url-metadata": "^4.1.1",
+    "zod": "^3.23.8"
   },
   "scripts": {
     "dev": "concurrently 'webpack --watch' 'web-ext run --target chromium --chromium-binary \"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\"'",
@@ -29,6 +33,7 @@
     "@babel/preset-env": "^7.10.2",
     "@types/chrome": "^0.0.227",
     "@types/firefox-webext-browser": "^111.0.1",
+    "@types/html-to-text": "^9",
     "@types/node": "^14.0.13",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",

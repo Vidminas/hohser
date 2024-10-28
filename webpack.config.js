@@ -55,7 +55,7 @@ module.exports = {
     }),
   ],
   resolve: {
-    extensions: ['.tsx', 'jsx', '.ts', '.js'],
+    extensions: ['.tsx', '.jsx', '.ts', '.js'],
   },
   output: {
     filename: 'firefox/static/js/[name].js',
