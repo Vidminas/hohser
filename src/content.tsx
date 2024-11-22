@@ -214,24 +214,23 @@ function processResult (r: Element, tagData: {[key: string]: FilterData[]}, opti
     
     removeResultStyle(result);
     const tags = tagData[url];
-    const matchingTags = [];
+    const highlightTags = [];
   
     for (const [filterType, selections] of Object.entries(selectedFilters)) {
       if (selections.size) {
-        console.log(selections, tags);
         const relevantTags = tags.filter(tag => tag.type === filterType).map(tag => tag.tag);
-        
-        if (relevantTags.find(tag => selections.has(tag))) {
+        const matchedTags = relevantTags.filter(tag => selections.has(tag));
+        if (matchedTags.length) {
           applyResultStyle(result, COLOR_2, HIGHLIGHT, options);
-          matchingTags.push(relevantTags[0]);
-        } else if (relevantTags.length && !matchingTags.length) {
+          highlightTags.push(...matchedTags);
+        } else if (relevantTags.length && !highlightTags.length) {
           applyResultStyle(result, "", PARTIAL_HIDE, options);
         }
       }
     }
 
     const badge = document.createElement("div");
-    ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} highlightTags={matchingTags} /></ThemeProvider>, badge);
+    ReactDOM.render(<ThemeProvider theme={getTheme()}><ChipsArray initData={tags} highlightTags={highlightTags} /></ThemeProvider>, badge);
     result.parentElement.insertBefore(badge, result);
     tagBars.push(badge);
 
